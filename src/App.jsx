@@ -2,7 +2,8 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import Header from "./components/Header.jsx";
 import Marquee from "./components/Marquee.jsx";
 import Hero from "./components/Hero/Hero.jsx";
-import Concept from "./components/Concept.jsx";
+import Stage from "./components/Stage.jsx";
+import TestSwitcher from "./components/TestSwitcher.jsx";
 import Token from "./components/Token.jsx";
 import HowToBuy from "./components/HowToBuy.jsx";
 import ContractAddress from "./components/ContractAddress.jsx";
@@ -10,12 +11,17 @@ import Footer from "./components/Footer.jsx";
 import { useLiveSignals } from "./pov/useLiveSignals.js";
 import { timeSignals } from "./pov/readSignals.js";
 import { composeView } from "./pov/composeView.js";
+import { MEMES, memeIndexOf } from "./pov/memes.jsx";
+import { CONFIG } from "./config.js";
 
 const FLIP_MS = 1400;
 
 export default function App({ base }) {
   const live = useLiveSignals();
   const [flipped, setFlipped] = useState(false);
+  const [memeIndex, setMemeIndex] = useState(() => memeIndexOf(CONFIG.MEME));
+  const [swapSide, setSwapSide] = useState(false); // testing only
+  const sceneRef = useRef(null);
   const pageRef = useRef(null);
 
   const signals = useMemo(
@@ -30,7 +36,9 @@ export default function App({ base }) {
     [base, live, flipped]
   );
 
-  const view = useMemo(() => composeView(signals), [signals]);
+  const view = useMemo(() => composeView(signals, memeIndex, swapSide), [signals, memeIndex, swapSide]);
+
+  const step = useCallback((d) => setMemeIndex((i) => (i + d + MEMES.length) % MEMES.length), []);
 
   // Palette + theme-color + motion flag on :root
   useEffect(() => {
@@ -81,16 +89,32 @@ export default function App({ base }) {
     <>
       <div className="page" ref={pageRef}>
         <Header />
-        <Marquee />
-        <Hero view={view} signals={signals} onFlip={onFlip} />
+        <Marquee question={view.meme.question} />
+        <Hero
+          view={view}
+          signals={signals}
+          onFlip={onFlip}
+          sceneRef={sceneRef}
+          onSwipe={CONFIG.TEST_SWITCHER ? step : undefined}
+        />
         <main>
-          <Concept view={view} />
+          <Stage view={view} sceneRef={sceneRef} />
           <Token reducedMotion={view.reducedMotion} />
           <HowToBuy reducedMotion={view.reducedMotion} />
           <ContractAddress reducedMotion={view.reducedMotion} />
         </main>
         <Footer />
       </div>
+      {CONFIG.TEST_SWITCHER && (
+        <TestSwitcher
+          name={view.meme.name}
+          index={memeIndex}
+          count={MEMES.length}
+          side={view.side}
+          onStep={step}
+          onSwapSide={() => setSwapSide((v) => !v)}
+        />
+      )}
     </>
   );
 }

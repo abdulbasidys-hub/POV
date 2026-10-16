@@ -1,8 +1,9 @@
 import { MARQUEE } from "../pov/copy.js";
 
 // Scrolling ticker strip. Static when motion is reduced.
-export default function Marquee() {
-  const run = [...MARQUEE, ...MARQUEE];
+export default function Marquee({ question }) {
+  const one = [question, ...MARQUEE];
+  const run = [...one, ...one];
   return (
     <div className="marquee" aria-hidden="true">
       <div className="marquee__track">

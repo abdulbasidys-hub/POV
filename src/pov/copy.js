@@ -33,40 +33,48 @@ export const BAND_PHRASE = {
   night: "night",
 };
 
-// What the visitor has in front of them. Same 6, four sides.
-export const READING_PHRASE = { 6: "a 6", 9: "a 9", sigma: "a σ", wave: "a wave" };
-
-// The big headline: what goes after "YOU SEE A".
-export const READING_WORD = { 6: "6", 9: "9", sigma: "σ", wave: "WAVE" };
-
-// What each side means.
-export const READING_MEANING = {
-  6: "A 6. Upright, the way it was written.",
-  9: "A 9. The same 6, from the other side.",
-  sigma: "σ. Volatility, if you trade. Sigma, if you're online.",
-  wave: "A wave, just breaking. Most people only see it once it has.",
-};
-
-// The hero scene: the two guys from the meme, and you.
-export const SCENE = {
-  guyA: "IT'S A 6!",
-  guyB: "IT'S A 9!",
-  you: {
-    6: "6. OBVIOUSLY.",
-    9: "9. OBVIOUSLY.",
-    sigma: "YOU'RE BOTH WRONG. SIGMA.",
-    wave: "GUYS. IT'S A WAVE.",
+// Every two-POV meme: what each guy yells, and what each end reads as.
+// `lead` + `word` is the headline ("YOU SEE A" + "6"); `me` is the share card's
+// version of the lead; `phrase` is used inside sentences.
+export const MEME_COPY = {
+  "six-nine": {
+    name: "6 or 9",
+    question: "6 OR 9?",
+    tagline: "Two guys. One number. Both right.",
+    guys: { front: "IT'S A 6!", back: "IT'S A 9!" },
+    front: { lead: "YOU SEE A", me: "I SEE A", word: "6", phrase: "a 6", meaning: "A 6. Upright, the way it was written.", you: "6. OBVIOUSLY." },
+    back: { lead: "YOU SEE A", me: "I SEE A", word: "9", phrase: "a 9", meaning: "A 9. The same 6, from the other side.", you: "9. OBVIOUSLY." },
   },
-  youTag: "YOU",
+  sticks: {
+    name: "3 or 4 sticks",
+    question: "3 OR 4?",
+    tagline: "Two guys. One drawing. Both counted right.",
+    guys: { front: "3 STICKS!", back: "4 STICKS!" },
+    front: { lead: "YOU SEE", me: "I SEE", word: "3 STICKS", phrase: "3 sticks", meaning: "Three sticks. Count again from the other end.", you: "3. I COUNTED." },
+    back: { lead: "YOU SEE", me: "I SEE", word: "4 STICKS", phrase: "4 sticks", meaning: "Four sticks. Count again from the other end.", you: "4. I COUNTED." },
+  },
+  "mom-wow": {
+    name: "MOM or WOW",
+    question: "MOM OR WOW?",
+    tagline: "Two guys. One word. Both read it right.",
+    guys: { front: "IT SAYS MOM!", back: "IT SAYS WOW!" },
+    front: { lead: "IT SAYS", me: "IT SAYS", word: "MOM", phrase: "MOM", meaning: "MOM. Who you call when it dips.", you: "MOM. OBVIOUSLY." },
+    back: { lead: "IT SAYS", me: "IT SAYS", word: "WOW", phrase: "WOW", meaning: "WOW. What you say when it doesn't.", you: "WOW. OBVIOUSLY." },
+  },
+  "pump-dump": {
+    name: "Pump or dump",
+    question: "PUMP OR DUMP?",
+    tagline: "Two guys. One arrow. Both right.",
+    guys: { front: "IT'S PUMPING!", back: "IT'S DUMPING!" },
+    front: { lead: "YOU SEE A", me: "I SEE A", word: "PUMP", phrase: "a pump", meaning: "Up only. From where you're standing.", you: "UP ONLY." },
+    back: { lead: "YOU SEE A", me: "I SEE A", word: "DUMP", phrase: "a dump", meaning: "Down bad. From where you're standing.", you: "DOWN BAD." },
+  },
 };
 
-// Tilt mode, after the ground has turned around.
-export const FLIPPED_LINE = {
-  6: "upside down. now it's a 6. funny how that works.",
-  9: "upside down. now it's a 9. funny how that works.",
-  sigma: "upside down. now it's a σ. funny how that works.",
-  wave: "upside down. now it's a wave. funny how that works.",
-};
+export const SCENE = { youTag: "YOU" };
+
+// Tilt mode, after the drawing has turned round.
+export const flippedLine = (phrase) => `upside down. now it's ${phrase}. funny how that works.`;
 
 export const PACE_LINE = {
   rusher: "slow down, degen. you'll catch the shape, not the details.",
@@ -75,8 +83,7 @@ export const PACE_LINE = {
 };
 
 export const RETURNING = {
-  reading: (last, now) =>
-    `last time you saw ${READING_PHRASE[last] || "something else"}. now it's ${READING_PHRASE[now]}. same thing.`,
+  side: (lastPhrase, nowPhrase) => `last time you saw ${lastPhrase}. now it's ${nowPhrase}. same thing.`,
   band: (lastBand) =>
     `last time you were here it was ${BAND_PHRASE[lastBand] || "another hour"}. same thing. the light moved.`,
   device: "last time you held it differently. same thing. new angle.",
@@ -84,7 +91,7 @@ export const RETURNING = {
 };
 
 export const NAV = {
-  about: "6 or 9?",
+  about: "Your POV",
   buy: "How to buy",
   x: "X",
   tg: "Telegram",
@@ -92,27 +99,35 @@ export const NAV = {
   ctaSoon: "CA soon",
 };
 
-export const MARQUEE = ["6 OR 9?", "SAME THING", "DIFFERENT POV", "$POV", "WHAT DO YOU SEE?", "ASK A FREN"];
+// The meme's question goes first.
+export const MARQUEE = ["SAME THING", "DIFFERENT POV", "$POV", "WHAT DO YOU SEE?", "ASK A FREN"];
 
 export const HERO = {
-  label: "Your POV",
-  lead: "YOU SEE A",
-  share: "Post your POV",
-  shareBusy: "Cooking…",
+  sub: "SAME THING. DIFFERENT POV.",
+  body: [
+    "Where you stand decides what you see: your sky, your screen, the way you hold it.",
+    "The site you're looking at isn't the one anyone else sees.",
+  ],
+  toStage: "See your POV",
   follow: "Follow on X",
   buy: "Buy on pump.fun",
+};
+
+export const STAGE = {
+  label: "Your POV",
+  heading: "From where you're standing",
+  share: "Post your POV",
+  shareBusy: "Cooking…",
   fine: "everyone sees something different. screenshot yours. ask a fren.",
   toast: "Your POV is saved. Post it.",
 };
 
-export const CONCEPT = {
-  line1: "6 OR 9?",
-  line2: "SAME THING. DIFFERENT POV.",
-  body: [
-    "Two guys. One number. Both right.",
-    "Where you stand decides what you see: your sky, your screen, the way you hold it.",
-    "The site you're looking at isn't the one anyone else sees.",
-  ],
+export const TESTER = {
+  label: "TEST",
+  prev: "Previous meme",
+  next: "Next meme",
+  side: "Switch side",
+  hint: "swipe the scene or use ← →",
 };
 
 export const TOKEN = {
@@ -162,8 +177,7 @@ export const FOOTER = {
 };
 
 export const SHARE = {
-  text: (siteUrl, reading) =>
-    `Same thing. Different POV. I see ${READING_PHRASE[reading]} — what do you see? $POV ${siteUrl}`,
+  text: (siteUrl, phrase) => `Same thing. Different POV. I see ${phrase} — what do you see? $POV ${siteUrl}`,
   label: "MY POV",
   ask: "WHAT DO YOU SEE?",
   ticker: "$POV",

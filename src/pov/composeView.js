@@ -1,14 +1,6 @@
-import { readingFor, standpointFor } from "./standpoint.js";
-import {
-  BAND_LINE,
-  FLIPPED_LINE,
-  PACE_LINE,
-  READING_MEANING,
-  READING_WORD,
-  RETURNING,
-  SCENE,
-  greetingFor,
-} from "./copy.js";
+import { otherSide, sideFor, standpointFor } from "./standpoint.js";
+import { MEMES } from "./memes.jsx";
+import { BAND_LINE, MEME_COPY, PACE_LINE, RETURNING, flippedLine, greetingFor } from "./copy.js";
 
 // Per-band colours. Page tokens in tokens.css mirror bg/ink/accent; the scene and
 // the share card read these directly.
@@ -98,9 +90,8 @@ export const PALETTES = {
   },
 };
 
-// The ground turns so the visitor's reading faces them: 6 upright, σ a quarter
-// turn clockwise, 9 upside down, wave a quarter turn the other way.
-export const READING_ANGLE = { 6: 0, sigma: 90, 9: 180, wave: 270 };
+// The ground turns so the visitor's end of the drawing faces them.
+export const SIDE_ANGLE = { front: 0, back: 180 };
 
 const DEG = Math.PI / 180;
 
@@ -112,37 +103,47 @@ function skyBodyFor(sun) {
   return { x: 300 + az * 220, y: 150 - alt * 95, isMoon: sun.isMoon };
 }
 
-function returningLineFor(r) {
+function returningLineFor(r, meme) {
   if (!r) return "";
-  if (r.kind === "reading") return RETURNING.reading(r.lastReading, r.reading);
+  if (r.kind === "side") {
+    const last = meme[r.lastSide];
+    const now = meme[otherSide(r.lastSide)];
+    return last && now ? RETURNING.side(last.phrase, now.phrase) : RETURNING.same;
+  }
   if (r.kind === "band") return RETURNING.band(r.lastBand);
   if (r.kind === "device") return RETURNING.device;
   return RETURNING.same;
 }
 
-// signals -> everything the page needs to render this visitor's view.
-export function composeView(s) {
+/**
+ * signals -> everything the page needs to render this visitor's view.
+ * `memeIndex` picks the meme; `swapSide` (testing only) puts you at the other end.
+ */
+export function composeView(s, memeIndex = 0, swapSide = false) {
+  const meme = MEMES[memeIndex] || MEMES[0];
+  const text = MEME_COPY[meme.id];
   const sp = standpointFor(s.sun, s.device, s.orientation);
-  const reading = readingFor(sp, s.flipped);
+  let side = sideFor(sp, s.flipped);
+  if (swapSide) side = otherSide(side);
+  const mine = text[side];
   return {
     band: s.band,
     device: s.device,
     orientation: s.orientation,
     palette: PALETTES[s.band],
-    reading,
-    angle: READING_ANGLE[reading],
+    meme: { id: meme.id, Drawing: meme.Drawing, name: text.name, question: text.question, tagline: text.tagline, guys: text.guys },
+    side,
+    angle: SIDE_ANGLE[side],
     sky: skyBodyFor(s.sun),
     idle: s.idle && !s.reducedMotion,
     flipped: s.flipped,
     reducedMotion: s.reducedMotion,
     copy: {
       greeting: greetingFor(s.hour),
-      bandLine: s.flipped ? FLIPPED_LINE[reading] : BAND_LINE[s.band],
-      returning: returningLineFor(s.returning),
+      bandLine: s.flipped ? flippedLine(mine.phrase) : BAND_LINE[s.band],
+      returning: returningLineFor(s.returning, text),
       pace: PACE_LINE[s.pace] || "",
-      word: READING_WORD[reading],
-      meaning: READING_MEANING[reading],
-      you: SCENE.you[reading],
+      ...mine,
     },
   };
 }

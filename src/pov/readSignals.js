@@ -1,6 +1,6 @@
 import SunCalc from "suncalc";
 import { tzToCoords } from "./tzCoords.js";
-import { readingFor, standpointFor } from "./standpoint.js";
+import { sideFor, standpointFor } from "./standpoint.js";
 
 // Signals are internal only. Nothing here is ever rendered raw or sent anywhere.
 
@@ -132,7 +132,7 @@ export function readOrientation() {
 }
 
 // §3.9 — reads the previous visit, then records this one.
-function readHistory({ band, device, orientation, reading }) {
+function readHistory({ band, device, orientation, side }) {
   const prev = storageGet(HISTORY_KEY);
   const now = Date.now();
   storageSet(HISTORY_KEY, {
@@ -140,12 +140,11 @@ function readHistory({ band, device, orientation, reading }) {
     lastBand: band,
     lastDevice: device,
     lastOrientation: orientation,
-    lastReading: reading,
+    lastSide: side,
     visits: ((prev && prev.visits) || 0) + 1,
   });
   if (!prev) return { returning: null };
-  if (prev.lastReading && prev.lastReading !== reading)
-    return { returning: { kind: "reading", lastReading: prev.lastReading, reading } };
+  if (prev.lastSide && prev.lastSide !== side) return { returning: { kind: "side", lastSide: prev.lastSide } };
   if (prev.lastBand && prev.lastBand !== band) return { returning: { kind: "band", lastBand: prev.lastBand } };
   if (
     (prev.lastDevice && prev.lastDevice !== device) ||
@@ -161,8 +160,8 @@ export function readSignals() {
   const time = timeSignals(now);
   const device = readDevice();
   const orientation = readOrientation();
-  const reading = readingFor(standpointFor(time.sun, device, orientation));
-  const history = readHistory({ band: time.band, device, orientation, reading });
+  const side = sideFor(standpointFor(time.sun, device, orientation));
+  const history = readHistory({ band: time.band, device, orientation, side });
 
   return {
     ...time,

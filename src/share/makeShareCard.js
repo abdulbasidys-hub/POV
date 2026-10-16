@@ -1,5 +1,5 @@
 import { CONFIG } from "../config.js";
-import { READING_WORD, SHARE } from "../pov/copy.js";
+import { SHARE } from "../pov/copy.js";
 
 const W = 1200;
 const H = 630;
@@ -18,7 +18,6 @@ async function fontsReady() {
   try {
     await Promise.all([
       document.fonts.load('400 48px "Bangers"'),
-      document.fonts.load('900 48px "Inter"', "σ"),
       document.fonts.load('700 20px "Inter"'),
     ]);
   } catch {
@@ -167,32 +166,36 @@ export async function makeShareCard({ view, svg }) {
   ctx.fillText(SHARE.label, 17, 35);
   ctx.restore();
 
-  const word = READING_WORD[view.reading];
-  const greek = view.reading === "sigma";
+  // "I SEE A" + "9."  /  "IT SAYS" + "WOW."
+  const lead = `${view.copy.me} `;
+  const word = `${view.copy.word}.`;
+  const BANGERS = (px) => `400 ${px}px "Bangers", Impact, sans-serif`;
   let size = 120;
-  const fit = () => {
-    ctx.font = `400 ${size}px "Bangers", Impact, sans-serif`;
-    const lead = ctx.measureText("I SEE A ").width;
-    ctx.font = greek ? `900 ${size * 0.86}px "Inter", sans-serif` : `400 ${size}px "Bangers", Impact, sans-serif`;
-    return lead + ctx.measureText(`${word}.`).width;
+  const fits = (px) => {
+    ctx.font = BANGERS(px);
+    return ctx.measureText(lead + word).width <= maxW;
   };
-  while (fit() > maxW && size > 48) size -= 4;
+  while (!fits(size) && size > 44) size -= 4;
+  ctx.font = BANGERS(size);
+  // two lines when the word is long (e.g. "3 STICKS")
+  const oneLine = ctx.measureText(lead + word).width <= maxW;
   const ty = 150 + size;
-  ctx.font = `400 ${size}px "Bangers", Impact, sans-serif`;
+  const leadW = ctx.measureText(lead).width;
   ctx.fillStyle = p.accent;
-  ctx.fillText("I SEE A ", x + 5, ty + 5);
+  ctx.fillText(lead, x + 5, ty + 5);
   ctx.fillStyle = p.text;
-  ctx.fillText("I SEE A ", x, ty);
-  const lead = ctx.measureText("I SEE A ").width;
-  ctx.font = greek ? `900 ${size * 0.86}px "Inter", sans-serif` : `400 ${size}px "Bangers", Impact, sans-serif`;
+  ctx.fillText(lead, x, ty);
+  const wx = oneLine ? x + leadW : x;
+  const wy = oneLine ? ty : ty + size * 0.92;
   ctx.fillStyle = line;
-  ctx.fillText(`${word}.`, x + lead + 5, ty + 5);
+  ctx.fillText(word, wx + 5, wy + 5);
   ctx.fillStyle = p.accent2;
-  ctx.fillText(`${word}.`, x + lead, ty);
+  ctx.fillText(word, wx, wy);
+  const meaningY = wy + 54;
 
   ctx.font = '700 26px "Inter", system-ui, sans-serif';
   ctx.fillStyle = p.text;
-  wrap(ctx, view.copy.meaning, maxW).forEach((l, i) => ctx.fillText(l, x, ty + 54 + i * 34));
+  wrap(ctx, view.copy.meaning, maxW).forEach((l, i) => ctx.fillText(l, x, meaningY + i * 34));
 
   ctx.font = '400 32px "Bangers", Impact, sans-serif';
   const aw = ctx.measureText(SHARE.ask).width + 40;
@@ -233,7 +236,7 @@ function download(blob) {
  * Must be called straight from a click so the popup and share sheet are allowed.
  */
 export async function shareMyView({ view, svg }) {
-  const text = SHARE.text(CONFIG.SITE_URL, view.reading);
+  const text = SHARE.text(CONFIG.SITE_URL, view.copy.phrase);
   const mobile = view.device !== "desktop";
   const useSheet = mobile && canShareFiles();
 

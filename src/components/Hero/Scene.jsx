@@ -1,22 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { SIX_PATH } from "../../pov/glyph6.js";
 import { SCENE } from "../../pov/copy.js";
 
-// The meme: one number painted on the ground, a guy at each end yelling what they
+// The meme: one drawing painted on the ground, a guy at each end yelling what they
 // see, and you in front. The ground turns to the visitor's own standpoint, so the
-// same 6 reads as whatever it reads as from where they're standing.
+// same drawing reads as whatever it reads as from where they're standing.
 
 const VB = 600; // the scene is VB×VB; a caption strip sits underneath
 const CAPTION = 84;
 const HORIZON = 250;
 const PLATE = { cx: 300, cy: 430, squash: 0.55 };
-const GUY_A = [150, 255]; // stands at the 6's base: sees a 6
-const GUY_B = [-150, -255]; // stands at its top: sees a 9
+const GUY_A = [205, 285]; // stands at the front end
+const GUY_B = [-205, -285]; // stands at the back end
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 // Turns the ground the short way round to a new angle (in degrees).
-function useAngle(target, reducedMotion) {
+export function useAngle(target, reducedMotion) {
   const [angle, setAngle] = useState(target);
   const cur = useRef(target);
   useEffect(() => {
@@ -188,7 +187,8 @@ function Sky({ palette, sky, band }) {
 /* ---------- scene ---------- */
 
 export default function Scene({ view, svgRef, label }) {
-  const { palette, sky, band, reducedMotion, idle } = view;
+  const { palette, sky, band, reducedMotion, idle, meme } = view;
+  const Drawing = meme.Drawing;
   const angle = useAngle(view.angle, reducedMotion);
 
   // Shadows fall away from the sun; longer when it's low.
@@ -198,8 +198,8 @@ export default function Scene({ view, svgRef, label }) {
   const a = project(GUY_A, angle);
   const b = project(GUY_B, angle);
   const guys = [
-    { key: "a", pos: a, cap: false, text: SCENE.guyA },
-    { key: "b", pos: b, cap: true, text: SCENE.guyB },
+    { key: "a", pos: a, cap: false, text: meme.guys.front },
+    { key: "b", pos: b, cap: true, text: meme.guys.back },
   ].sort((p, q) => p.pos[1] - q.pos[1]);
 
   const bubbleFor = (g, i) => {
@@ -246,13 +246,10 @@ export default function Scene({ view, svgRef, label }) {
         </>
       )}
 
-      {/* the number, painted flat on the ground and turned to your standpoint */}
+      {/* the drawing, painted flat on the ground and turned to your standpoint */}
       <g transform={`translate(${PLATE.cx} ${PLATE.cy}) scale(1 ${PLATE.squash}) rotate(${angle.toFixed(2)})`}>
-        <circle r="268" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
-        <g transform="scale(1.5)">
-          <path d={SIX_PATH} transform="translate(-5 7)" fill="#000" opacity="0.22" stroke="#000" strokeWidth="9" strokeLinejoin="round" />
-          <path d={SIX_PATH} fill={palette.paint} stroke={palette.paint} strokeWidth="9" strokeLinejoin="round" />
-        </g>
+        <circle r="300" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
+        <Drawing palette={palette} />
       </g>
 
       {/* the two guys, far one first */}
