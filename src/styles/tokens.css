@@ -1,0 +1,72 @@
+/* Base tokens. The site is always dark; the band only changes the light. */
+:root {
+  --font-display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --dur-s: 600ms;
+  --dur-m: 900ms;
+  --dur-l: 1200ms;
+
+  --gutter: clamp(16px, 5vw, 64px);
+  --letterbox: 0px;
+
+  /* night is the default palette until the band is resolved */
+  --bg: #04050a;
+  --light: #8fa8ff;
+  --accent: #2e3a73;
+  --text: #d9def5;
+
+  --text-dim: color-mix(in srgb, var(--text) 62%, var(--bg));
+  --text-faint: color-mix(in srgb, var(--text) 38%, var(--bg));
+  --line: color-mix(in srgb, var(--text) 14%, transparent);
+  --glow: color-mix(in srgb, var(--light) 22%, transparent);
+
+  color-scheme: dark;
+}
+
+/* Per-band palettes (§2) */
+:root[data-band="deadzone"] {
+  --bg: #05070a;
+  --light: #5fd3d9;
+  --accent: #1f6f73;
+  --text: #cfe9ea;
+}
+:root[data-band="dawn"] {
+  --bg: #0b0a14;
+  --light: #f2a7a0;
+  --accent: #5a4a8a;
+  --text: #ece6f2;
+}
+:root[data-band="morning"] {
+  --bg: #0a0d12;
+  --light: #cfe0f5;
+  --accent: #4f6f96;
+  --text: #e8eef6;
+}
+:root[data-band="afternoon"] {
+  --bg: #0c0c0c;
+  --light: #ffffff;
+  --accent: #8a8a8a;
+  --text: #f4f4f4;
+}
+:root[data-band="golden"] {
+  --bg: #100a05;
+  --light: #ffb347;
+  --accent: #a3561c;
+  --text: #f6e8d6;
+}
+:root[data-band="night"] {
+  --bg: #04050a;
+  --light: #8fa8ff;
+  --accent: #2e3a73;
+  --text: #d9def5;
+}
+
+/* Letterbox bars: desktop landscape only */
+@media (orientation: landscape) and (pointer: fine) and (min-width: 900px) {
+  :root {
+    --letterbox: 6vh;
+  }
+}
