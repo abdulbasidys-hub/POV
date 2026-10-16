@@ -1,9 +1,9 @@
 import { CONFIG } from "../config.js";
-import { SHARE } from "../pov/copy.js";
+import { READING_WORD, SHARE } from "../pov/copy.js";
 
 const W = 1200;
 const H = 630;
-const SPLIT = Math.round(W * 0.6);
+const BANGERS_URL = "/fonts/bangers-latin.woff2";
 
 function loadImage(src) {
   return new Promise((resolve, reject) => {
@@ -17,23 +17,61 @@ function loadImage(src) {
 async function fontsReady() {
   try {
     await Promise.all([
-      document.fonts.load('300 48px "Cormorant Garamond"'),
-      document.fonts.load('600 48px "Cormorant Garamond"'),
-      document.fonts.load('500 16px "Inter"'),
+      document.fonts.load('400 48px "Bangers"'),
+      document.fonts.load('900 48px "Inter"', "σ"),
+      document.fonts.load('700 20px "Inter"'),
     ]);
   } catch {
     /* system fallback fonts are fine */
   }
 }
 
-function drawCover(ctx, img, x, y, w, h) {
-  const iw = img.naturalWidth || img.width;
-  const ih = img.naturalHeight || img.height;
-  if (!iw || !ih) return;
-  const s = Math.max(w / iw, h / ih);
-  const dw = iw * s;
-  const dh = ih * s;
-  ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+function blobToDataURL(blob) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+
+let bangersData = null;
+async function bangersDataURL() {
+  if (bangersData) return bangersData;
+  try {
+    const res = await fetch(BANGERS_URL);
+    bangersData = await blobToDataURL(await res.blob());
+  } catch {
+    bangersData = "";
+  }
+  return bangersData;
+}
+
+// The visitor's own scene, as an image. An SVG drawn into a canvas can't see the
+// page's fonts, so the comic font is embedded into a copy of it.
+async function sceneImage(svg) {
+  if (!svg) return null;
+  const clone = svg.cloneNode(true);
+  const [, , vw, vh] = (svg.getAttribute("viewBox") || "0 0 600 684").split(/\s+/).map(Number);
+  clone.setAttribute("width", String(vw));
+  clone.setAttribute("height", String(vh));
+  clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  const font = await bangersDataURL();
+  if (font) {
+    const style = document.createElementNS("http://www.w3.org/2000/svg", "style");
+    style.textContent = `@font-face{font-family:"Bangers";src:url(${font}) format("woff2");}`;
+    clone.insertBefore(style, clone.firstChild);
+  }
+  const markup = new XMLSerializer().serializeToString(clone);
+  const url = URL.createObjectURL(new Blob([markup], { type: "image/svg+xml;charset=utf-8" }));
+  try {
+    const img = await loadImage(url);
+    return { img, vw, vh };
+  } catch {
+    return null;
+  } finally {
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 
 function wrap(ctx, text, maxWidth) {
@@ -51,121 +89,121 @@ function wrap(ctx, text, maxWidth) {
   return lines;
 }
 
-function addGrain(ctx, amount = 10) {
-  const img = ctx.getImageData(0, 0, W, H);
-  const d = img.data;
-  for (let i = 0; i < d.length; i += 4) {
-    const n = (Math.random() - 0.5) * amount;
-    d[i] += n;
-    d[i + 1] += n;
-    d[i + 2] += n;
-  }
-  ctx.putImageData(img, 0, 0);
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
 }
 
-async function heroSnapshot(canvas) {
-  if (canvas) {
-    try {
-      return await loadImage(canvas.toDataURL("image/png"));
-    } catch {
-      /* fall through */
-    }
-  }
-  try {
-    return await loadImage("/fallback-hero.png");
-  } catch {
-    return null;
-  }
+// A sticker-style box: hard offset shadow, thick outline.
+function sticker(ctx, x, y, w, h, r, fill, line, shadow, offset = 8) {
+  ctx.fillStyle = shadow;
+  roundRect(ctx, x + offset, y + offset, w, h, r);
+  ctx.fill();
+  ctx.fillStyle = fill;
+  roundRect(ctx, x, y, w, h, r);
+  ctx.fill();
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = line;
+  ctx.stroke();
 }
 
 /** Builds the 1200×630 share card for this visitor's view. Resolves to a PNG Blob. */
-export async function makeShareCard({ view, canvas }) {
-  const { palette } = view;
-  const [, snap] = await Promise.all([fontsReady(), heroSnapshot(canvas)]);
+export async function makeShareCard({ view, svg }) {
+  const p = view.palette;
+  const [, scene] = await Promise.all([fontsReady(), sceneImage(svg)]);
+  const css = getComputedStyle(document.documentElement);
+  const line = css.getPropertyValue("--line").trim() || "#000";
+  const shadow = css.getPropertyValue("--shadow").trim() || "#000";
+  const onAccent = css.getPropertyValue("--on-accent").trim() || "#0a0a0a";
 
   const c = document.createElement("canvas");
   c.width = W;
   c.height = H;
   const ctx = c.getContext("2d");
 
-  ctx.fillStyle = palette.bg;
+  // Background with halftone dots
+  ctx.fillStyle = p.bg;
   ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = p.text;
+  ctx.globalAlpha = 0.07;
+  for (let y = 9; y < H; y += 18) for (let x = 9; x < W; x += 18) ctx.fillRect(x, y, 2.4, 2.4);
+  ctx.globalAlpha = 1;
 
-  // Left 60%: the hero as this visitor saw it.
-  if (snap) {
+  // Left: their scene, framed like the page
+  const sh = 548;
+  const sw = scene ? Math.round((sh * scene.vw) / scene.vh) : 480;
+  const sx = 44;
+  const sy = 34;
+  sticker(ctx, sx, sy, sw, sh, 18, "#111", line, shadow, 10);
+  if (scene) {
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, SPLIT, H);
+    roundRect(ctx, sx, sy, sw, sh, 18);
     ctx.clip();
-    drawCover(ctx, snap, 0, 0, SPLIT, H);
-    if (!canvas) {
-      // fallback still: tint it with the key light, as the page does
-      ctx.globalCompositeOperation = "multiply";
-      ctx.fillStyle = palette.light;
-      ctx.fillRect(0, 0, SPLIT, H);
-      ctx.globalCompositeOperation = "source-over";
-    }
+    ctx.drawImage(scene.img, sx, sy, sw, sh);
     ctx.restore();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = line;
+    roundRect(ctx, sx, sy, sw, sh, 18);
+    ctx.stroke();
   }
-  // Soft hand-off into the text panel
-  const fade = ctx.createLinearGradient(SPLIT - 220, 0, SPLIT + 10, 0);
-  fade.addColorStop(0, `${palette.bg}00`);
-  fade.addColorStop(1, palette.bg);
-  ctx.fillStyle = fade;
-  ctx.fillRect(SPLIT - 220, 0, 232, H);
-  ctx.fillStyle = palette.bg;
-  ctx.fillRect(SPLIT + 10, 0, W - SPLIT, H);
 
-  // Band vignette
-  const v = ctx.createRadialGradient(W * 0.42, H * 0.5, H * 0.3, W * 0.5, H * 0.5, W * 0.72);
-  v.addColorStop(0, "rgba(0,0,0,0)");
-  v.addColorStop(1, "rgba(0,0,0,0.7)");
-  ctx.fillStyle = v;
-  ctx.fillRect(0, 0, W, H);
-  const glow = ctx.createRadialGradient(SPLIT * 0.5, H * 0.45, 0, SPLIT * 0.5, H * 0.45, H * 0.8);
-  glow.addColorStop(0, `${palette.light}14`);
-  glow.addColorStop(1, `${palette.light}00`);
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, W, H);
-
-  // Right 40%: their POV, what it means, the line, the ticker.
-  const x = SPLIT + 24;
-  const maxW = W - x - 56;
+  // Right: MY POV / I SEE A … / meaning / ask / ticker
+  const x = sx + sw + 56;
+  const maxW = W - x - 44;
   ctx.textBaseline = "alphabetic";
 
-  ctx.font = '500 13px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = palette.text;
-  if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
-  ctx.globalAlpha = 0.6;
-  ctx.fillText("MY POV", x, 110);
-  ctx.globalAlpha = 1;
-  if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+  ctx.save();
+  ctx.translate(x, 70);
+  ctx.rotate(-0.05);
+  ctx.font = '400 30px "Bangers", Impact, sans-serif';
+  const lw = ctx.measureText(SHARE.label).width + 34;
+  sticker(ctx, 0, 0, lw, 46, 10, p.accent2, line, shadow, 4);
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(SHARE.label, 17, 35);
+  ctx.restore();
 
-  let size = 76;
-  do {
-    ctx.font = `300 ${size}px "Cormorant Garamond", Georgia, serif`;
-    size -= 2;
-  } while (ctx.measureText(view.copy.statement).width > maxW && size > 30);
-  ctx.fillStyle = palette.text;
-  const statementY = 110 + 24 + size;
-  ctx.fillText(view.copy.statement, x, statementY);
+  const word = READING_WORD[view.reading];
+  const greek = view.reading === "sigma";
+  let size = 120;
+  const fit = () => {
+    ctx.font = `400 ${size}px "Bangers", Impact, sans-serif`;
+    const lead = ctx.measureText("I SEE A ").width;
+    ctx.font = greek ? `900 ${size * 0.86}px "Inter", sans-serif` : `400 ${size}px "Bangers", Impact, sans-serif`;
+    return lead + ctx.measureText(`${word}.`).width;
+  };
+  while (fit() > maxW && size > 48) size -= 4;
+  const ty = 150 + size;
+  ctx.font = `400 ${size}px "Bangers", Impact, sans-serif`;
+  ctx.fillStyle = p.accent;
+  ctx.fillText("I SEE A ", x + 5, ty + 5);
+  ctx.fillStyle = p.text;
+  ctx.fillText("I SEE A ", x, ty);
+  const lead = ctx.measureText("I SEE A ").width;
+  ctx.font = greek ? `900 ${size * 0.86}px "Inter", sans-serif` : `400 ${size}px "Bangers", Impact, sans-serif`;
+  ctx.fillStyle = line;
+  ctx.fillText(`${word}.`, x + lead + 5, ty + 5);
+  ctx.fillStyle = p.accent2;
+  ctx.fillText(`${word}.`, x + lead, ty);
 
-  ctx.font = 'italic 300 26px "Cormorant Garamond", Georgia, serif';
-  ctx.fillStyle = palette.light;
-  wrap(ctx, view.copy.meaning, maxW).forEach((l, i) => ctx.fillText(l, x, statementY + 58 + i * 32));
+  ctx.font = '700 26px "Inter", system-ui, sans-serif';
+  ctx.fillStyle = p.text;
+  wrap(ctx, view.copy.meaning, maxW).forEach((l, i) => ctx.fillText(l, x, ty + 54 + i * 34));
 
-  ctx.font = '500 15px "Inter", system-ui, sans-serif';
-  ctx.fillStyle = palette.light;
-  if ("letterSpacing" in ctx) ctx.letterSpacing = "2px";
-  ctx.fillText(SHARE.cardTagline, x, H - 92);
+  ctx.font = '400 32px "Bangers", Impact, sans-serif';
+  const aw = ctx.measureText(SHARE.ask).width + 40;
+  sticker(ctx, x, H - 124, aw, 54, 27, p.accent, line, shadow, 5);
+  ctx.fillStyle = onAccent;
+  ctx.fillText(SHARE.ask, x + 20, H - 86);
 
-  ctx.font = '600 34px "Cormorant Garamond", Georgia, serif';
-  ctx.fillStyle = palette.text;
-  if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
-  const tw = ctx.measureText(SHARE.cardTicker).width;
-  ctx.fillText(SHARE.cardTicker, W - 56 - tw, H - 48);
-
-  addGrain(ctx, 12);
+  ctx.font = '400 54px "Bangers", Impact, sans-serif';
+  ctx.fillStyle = p.text;
+  const tw = ctx.measureText(SHARE.ticker).width;
+  ctx.fillText(SHARE.ticker, W - 44 - tw, H - 50);
 
   return new Promise((resolve, reject) => c.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob"))), "image/png"));
 }
@@ -194,7 +232,7 @@ function download(blob) {
  * Full share flow. Returns true when the card was shared or saved.
  * Must be called straight from a click so the popup and share sheet are allowed.
  */
-export async function shareMyView({ view, canvas }) {
+export async function shareMyView({ view, svg }) {
   const text = SHARE.text(CONFIG.SITE_URL, view.reading);
   const mobile = view.device !== "desktop";
   const useSheet = mobile && canShareFiles();
@@ -212,7 +250,7 @@ export async function shareMyView({ view, canvas }) {
 
   let blob;
   try {
-    blob = await makeShareCard({ view, canvas });
+    blob = await makeShareCard({ view, svg });
   } catch {
     if (tab) tab.close();
     return false;

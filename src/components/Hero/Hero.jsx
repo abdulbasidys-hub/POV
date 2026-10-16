@@ -1,55 +1,82 @@
-import { Component, Suspense, lazy, useCallback, useState } from "react";
-import HeroFallback from "./HeroFallback.jsx";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import Scene from "./Scene.jsx";
 import TiltToggle from "../TiltToggle.jsx";
 import Crossfade from "../Crossfade.jsx";
-import { CONFIG } from "../../config.js";
+import { CONFIG, IS_LIVE, PUMPFUN_URL } from "../../config.js";
+import { HERO, READING_PHRASE, SCENE } from "../../pov/copy.js";
+import { shareMyView } from "../../share/makeShareCard.js";
 
-const HeroScene = lazy(() => import("./HeroScene.jsx"));
-
-class SceneBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { failed: false };
-  }
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  render() {
-    return this.state.failed ? <HeroFallback view={this.props.view} /> : this.props.children;
-  }
-}
-
-export default function Hero({ view, signals, canvasRef, onFlip }) {
-  const [ready, setReady] = useState(false);
-  const onReady = useCallback(() => setReady(true), []);
+export default function Hero({ view, signals, onFlip }) {
+  const svgRef = useRef(null);
+  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState(false);
+  const toastTimer = useRef(0);
   const mobile = signals.device !== "desktop";
+  const { copy, reading } = view;
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  const onShare = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      if (await shareMyView({ view, svg: svgRef.current })) {
+        setToast(true);
+        clearTimeout(toastTimer.current);
+        toastTimer.current = window.setTimeout(() => setToast(false), 3200);
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const label = `A 6 painted on the ground. One guy yells "${SCENE.guyA}", the other yells "${SCENE.guyB}". From where you stand it's ${READING_PHRASE[reading]}.`;
 
   return (
-    <header className="hero">
-      <div className={`hero__stage ${ready ? "is-ready" : ""}`}>
-        {signals.webgl ? (
-          <SceneBoundary view={view}>
-            <Suspense fallback={null}>
-              <HeroScene view={view} isPhone={signals.device === "phone"} canvasRef={canvasRef} onReady={onReady} />
-            </Suspense>
-          </SceneBoundary>
-        ) : (
-          <HeroFallback view={view} />
-        )}
+    <section className="hero" id="top">
+      <div className="hero__copy">
+        <p className="sticker sticker--greet">{copy.greeting}</p>
+        <Crossfade className="hero__band" text={copy.bandLine} reducedMotion={view.reducedMotion} />
+        <p className="label">{HERO.label}</p>
+        <h1 className="hero__title">
+          {HERO.lead}{" "}
+          <span className={`hero__word ${reading === "sigma" ? "is-greek" : ""}`} key={reading}>
+            {copy.word}
+          </span>
+          .
+        </h1>
+        <p className="hero__meaning">{copy.meaning}</p>
+        <div className="hero__ctas">
+          <button type="button" className="btn btn--accent" onClick={onShare} disabled={busy}>
+            {busy ? HERO.shareBusy : HERO.share}
+          </button>
+          <a
+            className="btn"
+            href={IS_LIVE ? PUMPFUN_URL(CONFIG.CA.trim()) : CONFIG.X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {IS_LIVE ? HERO.buy : HERO.follow}
+          </a>
+        </div>
+        {copy.returning && <p className="sticker sticker--note">{copy.returning}</p>}
+        <p className="hero__fine">{HERO.fine}</p>
       </div>
-      <div className="hero__scrim" aria-hidden="true" />
 
-      <div className="hero__mark">
-        {CONFIG.NAME}
-        <span>{CONFIG.TICKER}</span>
+      <div className="hero__art">
+        <div className="scene-card">
+          <Scene view={view} svgRef={svgRef} label={label} />
+        </div>
+        {mobile && <TiltToggle onFlip={onFlip} />}
       </div>
-      {mobile && <TiltToggle onFlip={onFlip} />}
 
-      <div className="hero__overlay">
-        <p className="hero__greeting">{view.copy.greeting}</p>
-        <Crossfade as="h1" className="hero__headline" text={view.copy.headline} reducedMotion={view.reducedMotion} />
-        {view.copy.returning && <p className="hero__returning">{view.copy.returning}</p>}
-      </div>
-    </header>
+      {createPortal(
+        <div className={`toast ${toast ? "is-shown" : ""}`} role="status" aria-hidden={!toast}>
+          {HERO.toast}
+        </div>,
+        document.body
+      )}
+    </section>
   );
 }

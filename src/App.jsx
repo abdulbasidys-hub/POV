@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Header from "./components/Header.jsx";
+import Marquee from "./components/Marquee.jsx";
 import Hero from "./components/Hero/Hero.jsx";
 import Concept from "./components/Concept.jsx";
-import YourView from "./components/YourView.jsx";
+import Token from "./components/Token.jsx";
 import HowToBuy from "./components/HowToBuy.jsx";
 import ContractAddress from "./components/ContractAddress.jsx";
 import Footer from "./components/Footer.jsx";
-import Grain from "./components/Grain.jsx";
 import { useLiveSignals } from "./pov/useLiveSignals.js";
 import { timeSignals } from "./pov/readSignals.js";
 import { composeView } from "./pov/composeView.js";
@@ -15,7 +16,6 @@ const FLIP_MS = 1400;
 export default function App({ base }) {
   const live = useLiveSignals();
   const [flipped, setFlipped] = useState(false);
-  const canvasRef = useRef(null);
   const pageRef = useRef(null);
 
   const signals = useMemo(
@@ -80,16 +80,17 @@ export default function App({ base }) {
   return (
     <>
       <div className="page" ref={pageRef}>
-        <Hero view={view} signals={signals} canvasRef={canvasRef} onFlip={onFlip} />
+        <Header />
+        <Marquee />
+        <Hero view={view} signals={signals} onFlip={onFlip} />
         <main>
           <Concept view={view} />
-          <YourView view={view} canvasRef={canvasRef} />
+          <Token reducedMotion={view.reducedMotion} />
           <HowToBuy reducedMotion={view.reducedMotion} />
           <ContractAddress reducedMotion={view.reducedMotion} />
         </main>
         <Footer />
       </div>
-      <Grain reducedMotion={view.reducedMotion} />
     </>
   );
 }

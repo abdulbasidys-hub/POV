@@ -155,15 +155,6 @@ function readHistory({ band, device, orientation, reading }) {
   return { returning: { kind: "same" } };
 }
 
-function hasWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    return Boolean(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl")));
-  } catch {
-    return false;
-  }
-}
-
 // Runs once on load.
 export function readSignals() {
   const now = new Date();
@@ -180,7 +171,6 @@ export function readSignals() {
     returning: history.returning,
     prefersLight: mq("(prefers-color-scheme: light)"),
     reducedMotion: mq("(prefers-reduced-motion: reduce)"),
-    webgl: hasWebGL(),
     pace: "undecided",
     idle: false,
     flipped: false,

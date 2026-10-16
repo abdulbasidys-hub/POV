@@ -1,72 +1,103 @@
-/* Base tokens. The site is always dark; the band only changes the light. */
+/* Self-hosted so the share card can embed it in its SVG. */
+@font-face {
+  font-family: "Bangers";
+  src: url("/fonts/bangers-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --font-display: "Cormorant Garamond", "Cormorant", Garamond, "Times New Roman", serif;
+  --font-display: "Bangers", Impact, "Arial Black", sans-serif;
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 
+  --pop: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease: cubic-bezier(0.2, 0.7, 0.1, 1);
-  --dur-s: 600ms;
-  --dur-m: 900ms;
-  --dur-l: 1200ms;
+  --gutter: clamp(16px, 4vw, 56px);
+  --radius: 18px;
+  --border: 4px;
 
-  --gutter: clamp(16px, 5vw, 64px);
-  --letterbox: 0px;
-
-  /* night is the default palette until the band is resolved */
-  --bg: #04050a;
-  --light: #8fa8ff;
-  --accent: #2e3a73;
-  --text: #d9def5;
-
-  --text-dim: color-mix(in srgb, var(--text) 62%, var(--bg));
-  --text-faint: color-mix(in srgb, var(--text) 38%, var(--bg));
-  --line: color-mix(in srgb, var(--text) 14%, transparent);
-  --glow: color-mix(in srgb, var(--light) 22%, transparent);
+  /* night is the default until the band is resolved */
+  --bg: #0d1230;
+  --ink: #f2f4ff;
+  --line: #000000;
+  --card: #161c45;
+  --accent: #b6ff3b;
+  --accent2: #8fa8ff;
+  --on-accent: #0a0a0a;
+  --shadow: #000000;
+  --dot: rgba(255, 255, 255, 0.06);
+  --muted: color-mix(in srgb, var(--ink) 70%, var(--bg));
 
   color-scheme: dark;
 }
 
-/* Per-band palettes (§2) */
+/* Per-band palettes. Mirror PALETTES in src/pov/composeView.js. */
 :root[data-band="deadzone"] {
-  --bg: #05070a;
-  --light: #5fd3d9;
-  --accent: #1f6f73;
-  --text: #cfe9ea;
+  --bg: #070b0e;
+  --ink: #d9fbff;
+  --line: #000000;
+  --card: #0e1519;
+  --accent: #3cf2ff;
+  --accent2: #ff3cac;
+  --shadow: #ff3cac;
+  --dot: rgba(60, 242, 255, 0.07);
+  color-scheme: dark;
 }
 :root[data-band="dawn"] {
-  --bg: #0b0a14;
-  --light: #f2a7a0;
-  --accent: #5a4a8a;
-  --text: #ece6f2;
+  --bg: #fff1ec;
+  --ink: #1a1020;
+  --line: #1a1020;
+  --card: #ffffff;
+  --accent: #ff5d8f;
+  --accent2: #7b5cff;
+  --shadow: #1a1020;
+  --dot: rgba(26, 16, 32, 0.07);
+  color-scheme: light;
 }
 :root[data-band="morning"] {
-  --bg: #0a0d12;
-  --light: #cfe0f5;
-  --accent: #4f6f96;
-  --text: #e8eef6;
+  --bg: #eef8ff;
+  --ink: #0b1b2b;
+  --line: #0b1b2b;
+  --card: #ffffff;
+  --accent: #ffd23f;
+  --accent2: #2f80ed;
+  --shadow: #0b1b2b;
+  --dot: rgba(11, 27, 43, 0.07);
+  color-scheme: light;
 }
 :root[data-band="afternoon"] {
-  --bg: #0c0c0c;
-  --light: #ffffff;
-  --accent: #8a8a8a;
-  --text: #f4f4f4;
+  --bg: #f5fbff;
+  --ink: #0a0a0a;
+  --line: #0a0a0a;
+  --card: #ffffff;
+  --accent: #ffe600;
+  --accent2: #ff3d00;
+  --shadow: #0a0a0a;
+  --dot: rgba(10, 10, 10, 0.07);
+  color-scheme: light;
 }
 :root[data-band="golden"] {
-  --bg: #100a05;
-  --light: #ffb347;
-  --accent: #a3561c;
-  --text: #f6e8d6;
+  --bg: #fff4e0;
+  --ink: #2a1300;
+  --line: #2a1300;
+  --card: #ffffff;
+  --accent: #ff5e00;
+  --accent2: #6a2c91;
+  --on-accent: #ffffff;
+  --shadow: #2a1300;
+  --dot: rgba(42, 19, 0, 0.08);
+  color-scheme: light;
 }
 :root[data-band="night"] {
-  --bg: #04050a;
-  --light: #8fa8ff;
-  --accent: #2e3a73;
-  --text: #d9def5;
-}
-
-/* Letterbox bars: desktop landscape only */
-@media (orientation: landscape) and (pointer: fine) and (min-width: 900px) {
-  :root {
-    --letterbox: 6vh;
-  }
+  --bg: #0d1230;
+  --ink: #f2f4ff;
+  --line: #000000;
+  --card: #161c45;
+  --accent: #b6ff3b;
+  --accent2: #8fa8ff;
+  --shadow: #000000;
+  --dot: rgba(255, 255, 255, 0.06);
+  color-scheme: dark;
 }

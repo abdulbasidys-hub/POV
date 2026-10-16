@@ -42,12 +42,12 @@ export default function ContractAddress({ reducedMotion }) {
 
   return (
     <Reveal className="section" reducedMotion={reducedMotion} aria-labelledby="ca-h">
-      <h2 id="ca-h" className="label">
+      <h2 id="ca-h" className="section__h">
         {CONTRACT.heading}
       </h2>
       <div className="ca">
         <code className="ca__value">{ca}</code>
-        <button type="button" className="btn" onClick={onCopy} aria-live="polite">
+        <button type="button" className="btn btn--accent" onClick={onCopy} aria-live="polite">
           {copied ? CONTRACT.copied : CONTRACT.copy}
         </button>
       </div>

@@ -9,8 +9,8 @@
 //   left   →  wave   (a wave just breaking)
 //
 // Nothing is random: you always stand in relation to your own sun (or moon), so
-// your place around the object moves with your local sky. The device decides the
-// height you look from and how far round you lean.
+// your place around the object moves with your local sky. The device decides how
+// far round you lean.
 
 const DEG = Math.PI / 180;
 
@@ -19,15 +19,13 @@ const SKY_OFFSET = 60;
 
 export const READINGS = ["6", "sigma", "9", "wave"];
 
+// How far round the circle each way of holding the screen puts you.
 export const COMPOSITIONS = {
-  // Standing over it, a few steps back. Reads clearly.
-  desktop: { offset: 0, elevation: 40, distance: 7.4, fov: 30, lead: 1.0 },
-  // Looking straight down at the floor; the shadow fills the frame.
-  phonePortrait: { offset: 0, elevation: 64, distance: 9.2, fov: 36, lead: 0.9 },
+  desktop: { offset: 0 },
+  phonePortrait: { offset: 0 },
   // Turn the phone sideways and you're a quarter-turn round: the sideways view.
-  phoneLandscape: { offset: -90, elevation: 30, distance: 6.8, fov: 30, lead: 0.6 },
-  // Three-quarter, mid-height.
-  tablet: { offset: 20, elevation: 46, distance: 8.0, fov: 32, lead: 0.9 },
+  phoneLandscape: { offset: -90 },
+  tablet: { offset: 20 },
 };
 
 export function compositionKey(device, orientation) {
@@ -43,16 +41,15 @@ export function wrapDeg(d) {
 }
 
 /**
- * Scene convention: an orbit azimuth `a` puts the camera at (sin a, ·, cos a).
- * a = 0 is the front (+z), where the digit reads as a 6. Moving to +a turns the
- * digit clockwise on screen.
- * SunCalc azimuth: 0 = south, +90° = west. The key light sits at sunAz + 180°.
+ * azimuthDeg is where you stand around the digit: 0 is the front, where it reads
+ * as a 6; moving to +a turns the digit clockwise from where you stand.
+ * SunCalc azimuth: 0 = south, +90° = west.
  */
 export function standpointFor(sun, device, orientation) {
   const key = compositionKey(device, orientation);
   const c = COMPOSITIONS[key];
   const azimuthDeg = wrapDeg(sun.azimuth / DEG + SKY_OFFSET + c.offset);
-  return { key, azimuthDeg, elevationDeg: c.elevation, ...c };
+  return { key, azimuthDeg };
 }
 
 // One of READINGS: which quarter of the circle the visitor is standing in.

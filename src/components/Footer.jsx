@@ -9,6 +9,11 @@ export default function Footer() {
         <a href={CONFIG.X_URL} target="_blank" rel="noopener noreferrer">
           {FOOTER.x}
         </a>
+        {CONFIG.TG_URL && (
+          <a href={CONFIG.TG_URL} target="_blank" rel="noopener noreferrer">
+            {FOOTER.tg}
+          </a>
+        )}
         {IS_LIVE && (
           <a href={PUMPFUN_URL(CONFIG.CA.trim())} target="_blank" rel="noopener noreferrer">
             {FOOTER.pumpfun}

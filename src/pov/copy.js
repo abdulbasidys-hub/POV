@@ -14,32 +14,14 @@ export function greetingFor(hour) {
   return GREETING.night;
 }
 
-export const HEADLINE = {
-  deadzone: "Nobody sees it like this. Except you.",
-  dawn: "The light is just arriving. So are you.",
-  morning: "Clear light. Clear view. Or so you think.",
-  afternoon: "Sun overhead. Nowhere to hide.",
-  golden: "Long shadows. Longer stories.",
-  night: "You're seeing it by moonlight.",
-};
-
-// What the visitor has in front of them. Same 6, four sides.
-export const READING_PHRASE = { 6: "a 6", 9: "a 9", sigma: "a σ", wave: "a wave" };
-
-// What each side means. Shown under the POV statement.
-export const READING_MEANING = {
-  6: "A 6. Upright, the way it was written.",
-  9: "A 9. The same 6, from the other side.",
-  sigma: "σ. Volatility, if you trade. Sigma, if you're online.",
-  wave: "A wave, just breaking. Most people only see it once it has.",
-};
-
-// Tilt mode, after the object has turned around.
-export const HEADLINE_FLIPPED = {
-  6: "Upside down. Now it's a 6. Funny how that works.",
-  9: "Upside down. Now it's a 9. Funny how that works.",
-  sigma: "Upside down. Now it's a σ. Funny how that works.",
-  wave: "Upside down. Now it's a wave. Funny how that works.",
+// One line per time band, under the greeting.
+export const BAND_LINE = {
+  deadzone: "3am. nobody else sees it like this.",
+  dawn: "early. like, actually early.",
+  morning: "clear skies. clear view. or so you think.",
+  afternoon: "sun's overhead. nowhere to hide.",
+  golden: "golden hour. long shadows. longer bags.",
+  night: "seeing it by moonlight.",
 };
 
 export const BAND_PHRASE = {
@@ -51,46 +33,102 @@ export const BAND_PHRASE = {
   night: "night",
 };
 
+// What the visitor has in front of them. Same 6, four sides.
+export const READING_PHRASE = { 6: "a 6", 9: "a 9", sigma: "a σ", wave: "a wave" };
+
+// The big headline: what goes after "YOU SEE A".
+export const READING_WORD = { 6: "6", 9: "9", sigma: "σ", wave: "WAVE" };
+
+// What each side means.
+export const READING_MEANING = {
+  6: "A 6. Upright, the way it was written.",
+  9: "A 9. The same 6, from the other side.",
+  sigma: "σ. Volatility, if you trade. Sigma, if you're online.",
+  wave: "A wave, just breaking. Most people only see it once it has.",
+};
+
+// The hero scene: the two guys from the meme, and you.
+export const SCENE = {
+  guyA: "IT'S A 6!",
+  guyB: "IT'S A 9!",
+  you: {
+    6: "6. OBVIOUSLY.",
+    9: "9. OBVIOUSLY.",
+    sigma: "YOU'RE BOTH WRONG. SIGMA.",
+    wave: "GUYS. IT'S A WAVE.",
+  },
+  youTag: "YOU",
+};
+
+// Tilt mode, after the ground has turned around.
+export const FLIPPED_LINE = {
+  6: "upside down. now it's a 6. funny how that works.",
+  9: "upside down. now it's a 9. funny how that works.",
+  sigma: "upside down. now it's a σ. funny how that works.",
+  wave: "upside down. now it's a wave. funny how that works.",
+};
+
 export const PACE_LINE = {
-  rusher: "You're moving fast. You'll catch the shape, not the details.",
-  reader: "You slowed down. That changes what you see.",
+  rusher: "slow down, degen. you'll catch the shape, not the details.",
+  reader: "you slowed down. that changes what you see.",
   undecided: "",
 };
 
 export const RETURNING = {
   reading: (last, now) =>
-    `Last time you saw ${READING_PHRASE[last] || "something else"}. Now it's ${READING_PHRASE[now]}. Same thing.`,
+    `last time you saw ${READING_PHRASE[last] || "something else"}. now it's ${READING_PHRASE[now]}. same thing.`,
   band: (lastBand) =>
-    `Last time you were here it was ${BAND_PHRASE[lastBand] || "another hour"}. Same thing. The light moved.`,
-  device: "Last time you held it differently. Same thing. New angle.",
-  same: "Same time, same screen. Still not the same view.",
+    `last time you were here it was ${BAND_PHRASE[lastBand] || "another hour"}. same thing. the light moved.`,
+  device: "last time you held it differently. same thing. new angle.",
+  same: "same time, same screen. still not the same view.",
+};
+
+export const NAV = {
+  about: "6 or 9?",
+  buy: "How to buy",
+  x: "X",
+  tg: "Telegram",
+  ctaLive: "Buy $POV",
+  ctaSoon: "CA soon",
+};
+
+export const MARQUEE = ["6 OR 9?", "SAME THING", "DIFFERENT POV", "$POV", "WHAT DO YOU SEE?", "ASK A FREN"];
+
+export const HERO = {
+  label: "Your POV",
+  lead: "YOU SEE A",
+  share: "Post your POV",
+  shareBusy: "Cooking…",
+  follow: "Follow on X",
+  buy: "Buy on pump.fun",
+  fine: "everyone sees something different. screenshot yours. ask a fren.",
+  toast: "Your POV is saved. Post it.",
 };
 
 export const CONCEPT = {
-  line1: "6 or 9?",
-  line2: "Same thing. Different POV.",
-  line4: "The site you're looking at isn't the one anyone else sees.",
+  line1: "6 OR 9?",
+  line2: "SAME THING. DIFFERENT POV.",
+  body: [
+    "Two guys. One number. Both right.",
+    "Where you stand decides what you see: your sky, your screen, the way you hold it.",
+    "The site you're looking at isn't the one anyone else sees.",
+  ],
 };
 
-export const POV = {
-  label: "Your POV",
-  statement: {
-    6: "You see a 6.",
-    9: "You see a 9.",
-    sigma: "You see a σ.",
-    wave: "You see a wave.",
-  },
-  shareButton: "Share my view",
-  shareBusy: "Developing…",
-  toast: "Your view is saved. Post it.",
+export const TOKEN = {
+  heading: "The boring part",
+  facts: [
+    { big: "1B", small: "supply" },
+    { big: "0%", small: "tax" },
+    { big: "FAIR", small: "launch" },
+    { big: "PUMP", small: ".fun" },
+  ],
 };
 
-export const SHARE = {
-  text: (siteUrl, reading) =>
-    `Same thing. Different POV. I see ${READING_PHRASE[reading]} — what do you see? $POV ${siteUrl}`,
-  cardTagline: "Same thing. Different POV.",
-  cardTicker: "$POV",
-  filename: "my-pov.png",
+export const LAUNCH = {
+  heading: "CA drops on X.",
+  body: "Not here. Not yet. Follow so you see it first.",
+  cta: "Follow on X",
 };
 
 export const HOW_TO_BUY = {
@@ -117,8 +155,17 @@ export const TILT = {
 
 export const FOOTER = {
   x: "X",
+  tg: "Telegram",
   pumpfun: "pump.fun",
   disclaimer:
     "69 is a memecoin with no intrinsic value or expectation of financial return. Depends how you look at it.",
 };
 
+export const SHARE = {
+  text: (siteUrl, reading) =>
+    `Same thing. Different POV. I see ${READING_PHRASE[reading]} — what do you see? $POV ${siteUrl}`,
+  label: "MY POV",
+  ask: "WHAT DO YOU SEE?",
+  ticker: "$POV",
+  filename: "my-pov.png",
+};
