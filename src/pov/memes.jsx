@@ -14,39 +14,37 @@ function SixNine({ palette }) {
   );
 }
 
-// Figure–ground: from the front end you count 3 painted bars; from the back
-// end the unpainted gaps become 4 rounded sticks poking into the paint.
+// The "3 or 4 sticks" impossible figure, painted on a white board: nine evenly
+// spaced lines run the full length. At the back end they close off as 4 beams
+// (pairs of strips, no gaps); at the front end as 3 beams (three lines each),
+// and the strips between them become gaps. Each end counts true on its own.
+const BEAM_GAP = 22;
+const BEAM_X = Array.from({ length: 9 }, (_, i) => (i - 4) * BEAM_GAP);
+const BEAM_BACK = -135;
+const BEAM_FRONT = 135;
+const BEAM_END = [9, 16]; // depth of each beam's end face
+
 function Sticks({ palette }) {
-  const W = 34; // column width
-  const bars = [-2, 0, 2].map((c) => c * W); // centres of the 3 bars
-  const gaps = [-3, -1, 1, 3].map((c) => c * W); // centres of the 4 sticks
-  const blockTop = -185;
-  const join = -20; // where the bars meet the painted block
-  const paint = palette.paint;
-  const shape = (
-    <>
-      <rect x={-4 * W - 6} y={blockTop} width={8 * W + 12} height={join - blockTop} rx="10" fill={paint} />
-      {bars.map((x) => (
-        <rect key={x} x={x - W / 2} y={join - 2} width={W} height={182} fill={paint} />
-      ))}
-      {gaps.map((x) => (
-        <path
-          key={x}
-          d={`M${x - W / 2} ${join + 1} V${blockTop + 34 + W / 2} A${W / 2} ${W / 2} 0 0 1 ${x + W / 2} ${blockTop + 34 + W / 2} V${join + 1} Z`}
-          fill={palette.ground}
-        />
-      ))}
-    </>
+  const ink = palette.ink === "#000000" ? "#111111" : palette.ink;
+  const end = (l, r, y, dir, key) => (
+    <path
+      key={key}
+      d={`M${BEAM_X[l]} ${y} L${BEAM_X[r]} ${y} L${BEAM_X[r] + BEAM_END[0]} ${y + dir * BEAM_END[1]} L${BEAM_X[l] + BEAM_END[0]} ${y + dir * BEAM_END[1]} Z`}
+      fill="#c9c9c9"
+      stroke={ink}
+      strokeWidth="3.4"
+      strokeLinejoin="round"
+    />
   );
   return (
     <g>
-      <g transform="translate(-6 8)" opacity="0.22">
-        <rect x={-4 * W - 6} y={blockTop} width={8 * W + 12} height={join - blockTop} rx="10" fill="#000" />
-        {bars.map((x) => (
-          <rect key={x} x={x - W / 2} y={join - 2} width={W} height={182} fill="#000" />
-        ))}
-      </g>
-      {shape}
+      <rect x="-122" y="-167" width="256" height="350" rx="14" fill="#000" opacity="0.22" />
+      <rect x="-128" y="-175" width="256" height="350" rx="14" fill={palette.paint} />
+      {[[0, 2], [2, 4], [4, 6], [6, 8]].map(([l, r], i) => end(l, r, BEAM_BACK, -1, `b${i}`))}
+      {[[0, 2], [3, 5], [6, 8]].map(([l, r], i) => end(l, r, BEAM_FRONT, 1, `f${i}`))}
+      {BEAM_X.map((x) => (
+        <line key={x} x1={x} y1={BEAM_BACK} x2={x} y2={BEAM_FRONT} stroke={ink} strokeWidth="3.4" strokeLinecap="round" />
+      ))}
     </g>
   );
 }
@@ -73,14 +71,22 @@ function MomWow({ palette }) {
   );
 }
 
-// An arrow painted pointing away from the front end: "up" from there, "down"
-// from the back.
-function PumpDump({ palette }) {
-  const d = "M-46 180 V-30 H-118 L0 -185 L118 -30 H46 V180 Z";
+// An upside-down face: brows and mouth are the same curve, so from the front
+// it smiles, and from the back the brows become a frown.
+function HappySad({ palette }) {
+  const ink = "#111111";
+  // A U-shaped curve (opens upward) centred at height y.
+  const arc = (y, w, depth) => `M${-w} ${y} Q0 ${y + depth} ${w} ${y}`;
   return (
     <g>
-      <path d={d} transform="translate(-6 8)" fill="#000" opacity="0.22" />
-      <path d={d} fill={palette.paint} stroke={palette.paint} strokeWidth="8" strokeLinejoin="round" />
+      <circle r="168" transform="translate(-6 8)" fill="#000" opacity="0.22" />
+      <circle r="168" fill="#ffd23f" stroke={ink} strokeWidth="10" />
+      <circle cx="-56" cy="0" r="18" fill={ink} />
+      <circle cx="56" cy="0" r="18" fill={ink} />
+      {/* front: a smile under the eyes. back: worried brows over them */}
+      <path d={arc(52, 80, 70)} fill="none" stroke={ink} strokeWidth="14" strokeLinecap="round" />
+      {/* front: a crease on the forehead. back: a frown down by the chin */}
+      <path d={arc(-112, 50, 30)} fill="none" stroke={ink} strokeWidth="12" strokeLinecap="round" />
     </g>
   );
 }
@@ -89,7 +95,7 @@ export const MEMES = [
   { id: "six-nine", Drawing: SixNine },
   { id: "sticks", Drawing: Sticks },
   { id: "mom-wow", Drawing: MomWow },
-  { id: "pump-dump", Drawing: PumpDump },
+  { id: "happy-sad", Drawing: HappySad },
 ];
 
 export function memeIndexOf(id) {

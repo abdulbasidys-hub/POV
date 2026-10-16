@@ -61,13 +61,13 @@ export const MEME_COPY = {
     front: { lead: "IT SAYS", me: "IT SAYS", word: "MOM", phrase: "MOM", meaning: "MOM. Who you call when it dips.", you: "MOM. OBVIOUSLY." },
     back: { lead: "IT SAYS", me: "IT SAYS", word: "WOW", phrase: "WOW", meaning: "WOW. What you say when it doesn't.", you: "WOW. OBVIOUSLY." },
   },
-  "pump-dump": {
-    name: "Pump or dump",
-    question: "PUMP OR DUMP?",
-    tagline: "Two guys. One arrow. Both right.",
-    guys: { front: "IT'S PUMPING!", back: "IT'S DUMPING!" },
-    front: { lead: "YOU SEE A", me: "I SEE A", word: "PUMP", phrase: "a pump", meaning: "Up only. From where you're standing.", you: "UP ONLY." },
-    back: { lead: "YOU SEE A", me: "I SEE A", word: "DUMP", phrase: "a dump", meaning: "Down bad. From where you're standing.", you: "DOWN BAD." },
+  "happy-sad": {
+    name: "Happy or sad",
+    question: "HAPPY OR SAD?",
+    tagline: "Two guys. One face. Both read it right.",
+    guys: { front: "HE'S HAPPY!", back: "HE'S SAD!" },
+    front: { lead: "YOU SEE A", me: "I SEE A", word: "SMILE", phrase: "a smile", meaning: "WAGMI. Depends which end of the trade you're on.", you: "WAGMI." },
+    back: { lead: "YOU SEE A", me: "I SEE A", word: "FROWN", phrase: "a frown", meaning: "NGMI. Depends which end of the trade you're on.", you: "NGMI." },
   },
 };
 
