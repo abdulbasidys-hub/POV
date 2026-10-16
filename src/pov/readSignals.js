@@ -5,7 +5,6 @@ import { readingFor, standpointFor } from "./standpoint.js";
 // Signals are internal only. Nothing here is ever rendered raw or sent anywhere.
 
 const HISTORY_KEY = "pov.history";
-const SOURCE_KEY = "pov.firstSource";
 
 export function storageGet(key) {
   try {
@@ -132,39 +131,6 @@ export function readOrientation() {
   return mq("(orientation: portrait)") ? "portrait" : "landscape";
 }
 
-// §3.6
-function classifySource(value) {
-  const v = (value || "").toLowerCase().trim();
-  if (!v) return "direct";
-  if (v === "x" || v === "twitter" || /(^|\.)(x\.com|twitter\.com|t\.co)$/.test(v)) return "x";
-  if (v === "telegram" || v === "tg" || /(^|\.)t\.me$/.test(v) || /(^|\.)telegram\./.test(v)) return "telegram";
-  if (v === "dexscreener" || /(^|\.)dexscreener\.com$/.test(v)) return "dexscreener";
-  if (v === "pumpfun" || v === "pump.fun" || v === "pump" || /(^|\.)pump\.fun$/.test(v)) return "pumpfun";
-  return "direct";
-}
-
-export function readSource() {
-  let param = "";
-  try {
-    const q = new URLSearchParams(window.location.search);
-    param = q.get("ref") || q.get("utm_source") || "";
-  } catch {
-    /* ignore */
-  }
-  let source = param ? classifySource(param) : "direct";
-  if (!param) {
-    try {
-      const host = document.referrer ? new URL(document.referrer).hostname : "";
-      if (host && host !== window.location.hostname) source = classifySource(host);
-    } catch {
-      /* ignore */
-    }
-  }
-  const first = storageGet(SOURCE_KEY);
-  if (!first) storageSet(SOURCE_KEY, { source, at: Date.now() });
-  return { source, firstSource: first ? first.source : source };
-}
-
 // §3.9 — reads the previous visit, then records this one.
 function readHistory({ band, device, orientation, reading }) {
   const prev = storageGet(HISTORY_KEY);
@@ -204,8 +170,6 @@ export function readSignals() {
   const time = timeSignals(now);
   const device = readDevice();
   const orientation = readOrientation();
-  const { source, firstSource } = readSource();
-  const lang = (navigator.language || "en").toLowerCase();
   const reading = readingFor(standpointFor(time.sun, device, orientation));
   const history = readHistory({ band: time.band, device, orientation, reading });
 
@@ -213,12 +177,8 @@ export function readSignals() {
     ...time,
     device,
     orientation,
-    source,
-    firstSource,
     returning: history.returning,
     prefersLight: mq("(prefers-color-scheme: light)"),
-    lang,
-    isEnglish: lang.startsWith("en"),
     reducedMotion: mq("(prefers-reduced-motion: reduce)"),
     webgl: hasWebGL(),
     pace: "undecided",

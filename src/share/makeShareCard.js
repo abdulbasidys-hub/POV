@@ -128,22 +128,31 @@ export async function makeShareCard({ view, canvas }) {
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, W, H);
 
-  // Right 40%: the sentence, the line, the ticker.
+  // Right 40%: their POV, what it means, the line, the ticker.
   const x = SPLIT + 24;
   const maxW = W - x - 56;
-  const top = 72;
-  const bottomReserve = 150;
-  let size = 40;
-  let lines;
+  ctx.textBaseline = "alphabetic";
+
+  ctx.font = '500 13px "Inter", system-ui, sans-serif';
+  ctx.fillStyle = palette.text;
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "4px";
+  ctx.globalAlpha = 0.6;
+  ctx.fillText("MY POV", x, 110);
+  ctx.globalAlpha = 1;
+  if ("letterSpacing" in ctx) ctx.letterSpacing = "0px";
+
+  let size = 76;
   do {
     ctx.font = `300 ${size}px "Cormorant Garamond", Georgia, serif`;
-    lines = wrap(ctx, view.copy.reveal, maxW);
-    size -= 1;
-  } while (lines.length * size * 1.18 > H - top - bottomReserve && size > 18);
-  size += 1;
+    size -= 2;
+  } while (ctx.measureText(view.copy.statement).width > maxW && size > 30);
   ctx.fillStyle = palette.text;
-  ctx.textBaseline = "alphabetic";
-  lines.forEach((l, i) => ctx.fillText(l, x, top + size + i * size * 1.18));
+  const statementY = 110 + 24 + size;
+  ctx.fillText(view.copy.statement, x, statementY);
+
+  ctx.font = 'italic 300 26px "Cormorant Garamond", Georgia, serif';
+  ctx.fillStyle = palette.light;
+  wrap(ctx, view.copy.meaning, maxW).forEach((l, i) => ctx.fillText(l, x, statementY + 58 + i * 32));
 
   ctx.font = '500 15px "Inter", system-ui, sans-serif';
   ctx.fillStyle = palette.light;

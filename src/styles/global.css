@@ -355,21 +355,13 @@ button {
 
 /* ---------- Your view ---------- */
 
-.yourview__sentence {
+.yourview__statement {
   font-family: var(--font-display);
   font-weight: 300;
-  font-size: clamp(30px, 4.8vw, 68px);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  margin: 32px 0 0;
-  max-width: 22ch;
-  text-wrap: pretty;
-}
-
-.yourview__sentence em {
-  font-style: italic;
-  color: var(--light);
-  transition: color var(--dur-l) var(--ease);
+  font-size: clamp(56px, 10vw, 150px);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin: 28px 0 0;
 }
 
 .yourview__meaning {
@@ -381,10 +373,6 @@ button {
   font-size: clamp(20px, 2.4vw, 28px);
   line-height: 1.3;
   color: var(--light);
-}
-
-.yourview__after {
-  margin: 28px 0 0;
 }
 
 .btn {

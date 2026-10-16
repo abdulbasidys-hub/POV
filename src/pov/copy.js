@@ -26,7 +26,7 @@ export const HEADLINE = {
 // What the visitor has in front of them. Same 6, four sides.
 export const READING_PHRASE = { 6: "a 6", 9: "a 9", sigma: "a σ", wave: "a wave" };
 
-// What each side means. Shown under the reveal sentence.
+// What each side means. Shown under the POV statement.
 export const READING_MEANING = {
   6: "A 6. Upright, the way it was written.",
   9: "A 9. The same 6, from the other side.",
@@ -72,35 +72,14 @@ export const CONCEPT = {
   line4: "The site you're looking at isn't the one anyone else sees.",
 };
 
-export const REVEAL = {
-  heading: "Why you're seeing this",
-  lead: {
-    6: "You're seeing a 6 because",
-    9: "You're seeing a 9 because",
-    sigma: "You're seeing a σ because",
-    wave: "You're seeing a wave because",
+export const POV = {
+  label: "Your POV",
+  statement: {
+    6: "You see a 6.",
+    9: "You see a 9.",
+    sigma: "You see a σ.",
+    wave: "You see a wave.",
   },
-  time: (band, city) => `it's ${BAND_PHRASE[band]} on ${city} time`,
-  device: {
-    phonePortrait: "you're holding a phone upright",
-    phoneLandscape: "you've turned your phone sideways",
-    tablet: "you're on a tablet",
-    desktop: "you're sitting at a big screen",
-  },
-  source: {
-    x: "you came from the timeline",
-    telegram: "someone in a group chat sent you",
-    dexscreener: "you came from the chart",
-    pumpfun: "you came from the curve",
-    direct: "you found your own way here",
-  },
-  lang: "your browser speaks a different language",
-  pace: {
-    rusher: "you were in a hurry",
-    reader: "you took your time",
-    undecided: "you barely moved",
-  },
-  after: "Change any of that, and you'd see something else.",
   shareButton: "Share my view",
   shareBusy: "Developing…",
   toast: "Your view is saved. Post it.",
@@ -143,9 +122,3 @@ export const FOOTER = {
     "69 is a memecoin with no intrinsic value or expectation of financial return. Depends how you look at it.",
 };
 
-// Joins fragments naturally: "a, b, c and d".
-export function joinNatural(parts) {
-  const p = parts.filter(Boolean);
-  if (p.length <= 1) return p.join("");
-  return `${p.slice(0, -1).join(", ")} and ${p[p.length - 1]}`;
-}

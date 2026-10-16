@@ -6,9 +6,8 @@ import {
   READING_MEANING,
   PACE_LINE,
   RETURNING,
-  REVEAL,
+  POV,
   greetingFor,
-  joinNatural,
 } from "./copy.js";
 
 // Mirrors tokens.css; the 3D scene and the share card need the raw values.
@@ -75,12 +74,6 @@ function keyLightFor(band, sun, prefersLight, sp) {
   return { mode: "directional", direction: dir, altitudeDeg: alt / DEG, intensity, ambient, shadowRadius, isMoon };
 }
 
-function deviceFragFor(device, orientation) {
-  if (device === "phone") return orientation === "portrait" ? REVEAL.device.phonePortrait : REVEAL.device.phoneLandscape;
-  if (device === "tablet") return REVEAL.device.tablet;
-  return REVEAL.device.desktop;
-}
-
 function returningLineFor(r) {
   if (!r) return "";
   if (r.kind === "reading") return RETURNING.reading(r.lastReading, r.reading);
@@ -89,19 +82,8 @@ function returningLineFor(r) {
   return RETURNING.same;
 }
 
-export function revealFragments(s) {
-  return [
-    REVEAL.time(s.band, s.place.city),
-    deviceFragFor(s.device, s.orientation),
-    REVEAL.source[s.source] || REVEAL.source.direct,
-    s.isEnglish ? "" : REVEAL.lang,
-    REVEAL.pace[s.pace] || REVEAL.pace.undecided,
-  ].filter(Boolean);
-}
-
 // signals -> everything the page needs to render this visitor's view.
 export function composeView(s) {
-  const fragments = revealFragments(s);
   const sp = standpointFor(s.sun, s.device, s.orientation);
   const reading = readingFor(sp, s.flipped);
   return {
@@ -120,10 +102,8 @@ export function composeView(s) {
       headline: s.flipped ? HEADLINE_FLIPPED[reading] : HEADLINE[s.band],
       returning: returningLineFor(s.returning),
       pace: PACE_LINE[s.pace] || "",
-      revealFragments: fragments,
-      lead: REVEAL.lead[reading],
+      statement: POV.statement[reading],
       meaning: READING_MEANING[reading],
-      reveal: `${REVEAL.lead[reading]} ${joinNatural(fragments)}.`,
       bandPhrase: BAND_PHRASE[s.band],
     },
   };
