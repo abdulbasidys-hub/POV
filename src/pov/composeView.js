@@ -131,7 +131,17 @@ export function composeView(s, memeIndex = 0, swapSide = false) {
     device: s.device,
     orientation: s.orientation,
     palette: PALETTES[s.band],
-    meme: { id: meme.id, Drawing: meme.Drawing, name: text.name, question: text.question, tagline: text.tagline, guys: text.guys },
+    meme: {
+      id: meme.id,
+      Drawing: meme.Drawing, // painted on the turning ground
+      Ground: meme.Ground, // or drawn in screen space, with its own layout
+      StageDrawing: meme.StageDrawing,
+      layout: meme.layout,
+      name: text.name,
+      question: text.question,
+      tagline: text.tagline,
+      guys: text.guys,
+    },
     side,
     angle: SIDE_ANGLE[side],
     sky: skyBodyFor(s.sun),

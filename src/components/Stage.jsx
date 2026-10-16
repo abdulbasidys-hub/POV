@@ -35,7 +35,7 @@ function Curtain({ side, ink }) {
 
 function StageArt({ view }) {
   const { palette, meme, reducedMotion } = view;
-  const Drawing = meme.Drawing;
+  const { Drawing, StageDrawing } = meme;
   const angle = useAngle(view.angle, reducedMotion);
   const ink = "#111";
   return (
@@ -66,11 +66,17 @@ function StageArt({ view }) {
 
       {/* the patch of ground, as you see it */}
       <g transform="translate(400 262)">
-        <rect x="-168" y="-196" width="336" height="392" rx="22" transform="translate(10 12)" fill="#000" opacity="0.45" />
-        <rect x="-168" y="-196" width="336" height="392" rx="22" fill={palette.ground} stroke={ink} strokeWidth="6" />
-        <g transform={`rotate(${angle.toFixed(2)}) scale(0.86)`}>
-          <Drawing palette={palette} />
-        </g>
+        {StageDrawing ? (
+          <StageDrawing palette={palette} side={view.side} />
+        ) : (
+          <>
+            <rect x="-168" y="-196" width="336" height="392" rx="22" transform="translate(10 12)" fill="#000" opacity="0.45" />
+            <rect x="-168" y="-196" width="336" height="392" rx="22" fill={palette.ground} stroke={ink} strokeWidth="6" />
+            <g transform={`rotate(${angle.toFixed(2)}) scale(0.86)`}>
+              <Drawing palette={palette} />
+            </g>
+          </>
+        )}
       </g>
 
       {/* curtains and valance */}

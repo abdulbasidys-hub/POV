@@ -48,8 +48,8 @@ export const MEME_COPY = {
   sticks: {
     name: "3 or 4 sticks",
     question: "3 OR 4?",
-    tagline: "Two guys. One drawing. Both counted right.",
-    guys: { front: "3 STICKS!", back: "4 STICKS!" },
+    tagline: "Two guys. One pile of sticks. Both counted right.",
+    guys: { front: "NO, THREE!", back: "FOUR!" },
     front: { lead: "YOU SEE", me: "I SEE", word: "3 STICKS", phrase: "3 sticks", meaning: "Three sticks. Count again from the other end.", you: "3. I COUNTED." },
     back: { lead: "YOU SEE", me: "I SEE", word: "4 STICKS", phrase: "4 sticks", meaning: "Four sticks. Count again from the other end.", you: "4. I COUNTED." },
   },
@@ -60,14 +60,6 @@ export const MEME_COPY = {
     guys: { front: "IT SAYS MOM!", back: "IT SAYS WOW!" },
     front: { lead: "IT SAYS", me: "IT SAYS", word: "MOM", phrase: "MOM", meaning: "MOM. Who you call when it dips.", you: "MOM. OBVIOUSLY." },
     back: { lead: "IT SAYS", me: "IT SAYS", word: "WOW", phrase: "WOW", meaning: "WOW. What you say when it doesn't.", you: "WOW. OBVIOUSLY." },
-  },
-  "happy-sad": {
-    name: "Happy or sad",
-    question: "HAPPY OR SAD?",
-    tagline: "Two guys. One face. Both read it right.",
-    guys: { front: "HE'S HAPPY!", back: "HE'S SAD!" },
-    front: { lead: "YOU SEE A", me: "I SEE A", word: "SMILE", phrase: "a smile", meaning: "WAGMI. Depends which end of the trade you're on.", you: "WAGMI." },
-    back: { lead: "YOU SEE A", me: "I SEE A", word: "FROWN", phrase: "a frown", meaning: "NGMI. Depends which end of the trade you're on.", you: "NGMI." },
   },
 };
 

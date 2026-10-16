@@ -188,15 +188,18 @@ function Sky({ palette, sky, band }) {
 
 export default function Scene({ view, svgRef, label }) {
   const { palette, sky, band, reducedMotion, idle, meme } = view;
-  const Drawing = meme.Drawing;
+  const { Drawing, Ground, layout } = meme;
   const angle = useAngle(view.angle, reducedMotion);
 
   // Shadows fall away from the sun; longer when it's low.
   const lowness = Math.max(0, Math.min(1, (sky.y - 55) / 95));
   const shadowDx = Math.max(-1, Math.min(1, (PLATE.cx - sky.x) / 230)) * (8 + lowness * 34);
 
-  const a = project(GUY_A, angle);
-  const b = project(GUY_B, angle);
+  // Painted memes: the guys stand on the turning ground. Screen-space memes
+  // (the sticks) put them at fixed spots, and move you to your end instead.
+  const a = layout ? layout.front : project(GUY_A, angle);
+  const b = layout ? layout.back : project(GUY_B, angle);
+  const youDx = layout ? layout.you[view.side] : 0;
   const guys = [
     { key: "a", pos: a, cap: false, text: meme.guys.front },
     { key: "b", pos: b, cap: true, text: meme.guys.back },
@@ -246,11 +249,15 @@ export default function Scene({ view, svgRef, label }) {
         </>
       )}
 
-      {/* the drawing, painted flat on the ground and turned to your standpoint */}
-      <g transform={`translate(${PLATE.cx} ${PLATE.cy}) scale(1 ${PLATE.squash}) rotate(${angle.toFixed(2)})`}>
-        <circle r="300" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
-        <Drawing palette={palette} />
-      </g>
+      {Ground ? (
+        <Ground palette={palette} side={view.side} />
+      ) : (
+        /* the drawing, painted flat on the ground and turned to your standpoint */
+        <g transform={`translate(${PLATE.cx} ${PLATE.cy}) scale(1 ${PLATE.squash}) rotate(${angle.toFixed(2)})`}>
+          <circle r="300" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
+          <Drawing palette={palette} />
+        </g>
+      )}
 
       {/* the two guys, far one first */}
       {guys.map((g) => (
@@ -259,7 +266,7 @@ export default function Scene({ view, svgRef, label }) {
       {guys.map(bubbleFor)}
 
       {/* you, from behind, in front of everything */}
-      <g className="scene-you">
+      <g className="scene-you" transform={youDx ? `translate(${youDx} 0)` : undefined}>
         {band === "deadzone" && (
           <g>
             <rect x="376" y="548" width="44" height="70" rx="8" fill="#111" stroke={palette.ink} strokeWidth="4" />

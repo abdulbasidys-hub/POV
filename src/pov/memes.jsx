@@ -14,37 +14,78 @@ function SixNine({ palette }) {
   );
 }
 
-// The "3 or 4 sticks" impossible figure, painted on a white board: nine evenly
-// spaced lines run the full length. At the back end they close off as 4 beams
-// (pairs of strips, no gaps); at the front end as 3 beams (three lines each),
-// and the strips between them become gaps. Each end counts true on its own.
-const BEAM_GAP = 22;
-const BEAM_X = Array.from({ length: 9 }, (_, i) => (i - 4) * BEAM_GAP);
-const BEAM_BACK = -135;
-const BEAM_FRONT = 135;
-const BEAM_END = [9, 16]; // depth of each beam's end face
+// The "3 or 4 sticks" impossible figure, drawn as in the original meme: beams
+// lying on the ground. Nine parallel lines; at the left end they close off as 4
+// beams (each with a grey end face), at the right end as 3 beams with gaps.
+// Unlike the painted memes this is drawn in screen space, not on the turning
+// ground: you stand at one end of the pile or the other.
+const vadd = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const vmul = (a, k) => [a[0] * k, a[1] * k];
 
-function Sticks({ palette }) {
-  const ink = palette.ink === "#000000" ? "#111111" : palette.ink;
-  const end = (l, r, y, dir, key) => (
-    <path
-      key={key}
-      d={`M${BEAM_X[l]} ${y} L${BEAM_X[r]} ${y} L${BEAM_X[r] + BEAM_END[0]} ${y + dir * BEAM_END[1]} L${BEAM_X[l] + BEAM_END[0]} ${y + dir * BEAM_END[1]} Z`}
-      fill="#c9c9c9"
-      stroke={ink}
-      strokeWidth="3.4"
-      strokeLinejoin="round"
-    />
+function beamGeometry({ origin, len, angle = -20, W = [11, 15], H = [0, 18.4] }) {
+  const r = (angle * Math.PI) / 180;
+  const D = [Math.cos(r), Math.sin(r)];
+  const L = [origin];
+  for (let k = 1; k < 9; k++) L.push(vadd(L[k - 1], k % 2 ? W : H));
+  const steps = [W, H, W, W, H, W, W, H]; // the gaps at the right end step like a top face
+  const R = [vadd(origin, vmul(D, len))];
+  for (let k = 1; k < 9; k++) R.push(vadd(R[k - 1], steps[k - 1]));
+  // keep each right endpoint on its own line
+  return {
+    L,
+    R: R.map((p, k) => vadd(L[k], vmul(D, (p[0] - L[k][0]) * D[0] + (p[1] - L[k][1]) * D[1]))),
+  };
+}
+
+const pts = (list) => list.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L");
+
+// `mark`: "four" | "three" — colour that end's faces to show where you stand.
+export function Beams({ origin, len, size = 1, ink = "#111111", cap = "#bdbdbd", mark, markColor, strokeWidth = 3 }) {
+  const g = beamGeometry({ origin, len, W: [11 * size, 15 * size], H: [0, 18.4 * size] });
+  const sw = strokeWidth;
+  return (
+    <g strokeLinejoin="round" strokeLinecap="round">
+      {[0, 1, 2, 3].map((j) => {
+        const [a, b, c] = [g.L[2 * j], g.L[2 * j + 1], g.L[2 * j + 2]];
+        const d = vadd(a, [c[0] - b[0], c[1] - b[1]]);
+        return <path key={`l${j}`} d={`M${pts([a, b, c, d])} Z`} fill={mark === "four" ? markColor : cap} stroke={ink} strokeWidth={sw} />;
+      })}
+      {mark === "three" &&
+        [[0, 1, 2], [3, 4, 5], [6, 7, 8]].map(([i, j, k]) => {
+          const [a, b, c] = [g.R[i], g.R[j], g.R[k]];
+          const d = vadd(a, [c[0] - b[0], c[1] - b[1]]);
+          return <path key={`m${i}`} d={`M${pts([a, b, c, d])} Z`} fill={markColor} stroke={ink} strokeWidth={sw} />;
+        })}
+      {[[0, 1, 2], [3, 4, 5], [6, 7, 8]].map(([i, j, k]) => (
+        <path key={`r${i}`} d={`M${pts([g.R[i], g.R[j], g.R[k]])}`} fill="none" stroke={ink} strokeWidth={sw} />
+      ))}
+      {g.L.map((p, k) => (
+        <path key={`s${k}`} d={`M${pts([p, g.R[k]])}`} fill="none" stroke={ink} strokeWidth={sw} />
+      ))}
+    </g>
   );
+}
+
+// Hero scene: a white mat on the ground with the beams on it.
+function SticksGround({ palette }) {
   return (
     <g>
-      <rect x="-122" y="-167" width="256" height="350" rx="14" fill="#000" opacity="0.22" />
-      <rect x="-128" y="-175" width="256" height="350" rx="14" fill={palette.paint} />
-      {[[0, 2], [2, 4], [4, 6], [6, 8]].map(([l, r], i) => end(l, r, BEAM_BACK, -1, `b${i}`))}
-      {[[0, 2], [3, 5], [6, 8]].map(([l, r], i) => end(l, r, BEAM_FRONT, 1, `f${i}`))}
-      {BEAM_X.map((x) => (
-        <line key={x} x1={x} y1={BEAM_BACK} x2={x} y2={BEAM_FRONT} stroke={ink} strokeWidth="3.4" strokeLinecap="round" />
-      ))}
+      <ellipse cx="318" cy="424" rx="262" ry="122" fill="#000" opacity="0.18" />
+      <ellipse cx="312" cy="416" rx="262" ry="122" fill={palette.paint} />
+      <Beams origin={[128, 392]} len={340} size={1.25} strokeWidth={3.4} />
+    </g>
+  );
+}
+
+// Stage: the pile, with your end lit up.
+function SticksStage({ palette, side }) {
+  const yours = side === "front" ? "three" : "four";
+  return (
+    <g>
+      <rect x="-205" y="-150" width="410" height="300" rx="20" transform="translate(10 12)" fill="#000" opacity="0.45" />
+      <rect x="-205" y="-150" width="410" height="300" rx="20" fill="#ffffff" stroke="#111" strokeWidth="6" />
+      <ellipse cx={yours === "four" ? -148 : 156} cy={yours === "four" ? 48 : -50} rx="62" ry="104" fill={palette.accent} opacity="0.35" />
+      <Beams origin={[-176, 0]} len={330} size={1.3} mark={yours} markColor={palette.accent} strokeWidth={3.6} />
     </g>
   );
 }
@@ -71,31 +112,16 @@ function MomWow({ palette }) {
   );
 }
 
-// An upside-down face: brows and mouth are the same curve, so from the front
-// it smiles, and from the back the brows become a frown.
-function HappySad({ palette }) {
-  const ink = "#111111";
-  // A U-shaped curve (opens upward) centred at height y.
-  const arc = (y, w, depth) => `M${-w} ${y} Q0 ${y + depth} ${w} ${y}`;
-  return (
-    <g>
-      <circle r="168" transform="translate(-6 8)" fill="#000" opacity="0.22" />
-      <circle r="168" fill="#ffd23f" stroke={ink} strokeWidth="10" />
-      <circle cx="-56" cy="0" r="18" fill={ink} />
-      <circle cx="56" cy="0" r="18" fill={ink} />
-      {/* front: a smile under the eyes. back: worried brows over them */}
-      <path d={arc(52, 80, 70)} fill="none" stroke={ink} strokeWidth="14" strokeLinecap="round" />
-      {/* front: a crease on the forehead. back: a frown down by the chin */}
-      <path d={arc(-112, 50, 30)} fill="none" stroke={ink} strokeWidth="12" strokeLinecap="round" />
-    </g>
-  );
-}
-
 export const MEMES = [
   { id: "six-nine", Drawing: SixNine },
-  { id: "sticks", Drawing: Sticks },
+  {
+    id: "sticks",
+    Ground: SticksGround,
+    StageDrawing: SticksStage,
+    // the two guys stand at the ends of the pile; you stand behind the one you agree with
+    layout: { front: [548, 372], back: [78, 488], you: { front: 160, back: -160 } },
+  },
   { id: "mom-wow", Drawing: MomWow },
-  { id: "happy-sad", Drawing: HappySad },
 ];
 
 export function memeIndexOf(id) {
