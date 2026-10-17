@@ -4,6 +4,7 @@ export const CONFIG = {
   CA: "",                                  // empty = pre-launch mode
   X_URL: "https://x.com/REPLACE_ME",
   TG_URL: "",                              // empty = no Telegram link
+  COMMUNITY_URL: "",                       // X community / group; empty = TG_URL, then X_URL
   SITE_URL: "https://REPLACE_ME",
   MEME: "six-nine",                        // six-nine | sticks | mom-wow
   // TESTING ONLY: shows the bar for swiping between memes and switching side.

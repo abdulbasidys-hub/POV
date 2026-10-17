@@ -114,6 +114,15 @@ export const STAGE = {
   toast: "Your POV is saved. Post it.",
 };
 
+export const COMMUNITY = {
+  label: "Your turn",
+  heading: "SEEN SOMETHING WITH TWO SIDES?",
+  body: "A word, a doodle, a chart, a shadow. Anything that changes depending on where you stand. Post it in the community and tag $POV.",
+  post: "Post it on X",
+  join: "Join the community",
+  text: (siteUrl) => `Found something with two POVs. What do you see? $POV ${siteUrl}`,
+};
+
 export const TESTER = {
   label: "TEST",
   prev: "Previous meme",

@@ -8,7 +8,7 @@ import { SCENE } from "../../pov/copy.js";
 const VB = 600; // the scene is VB×VB; a caption strip sits underneath
 const CAPTION = 84;
 const HORIZON = 250;
-const PLATE = { cx: 300, cy: 430, squash: 0.55 };
+const PLATE = { cx: 300, cy: 415, squash: 0.55 };
 const GUY_A = [205, 285]; // stands at the front end
 const GUY_B = [-205, -285]; // stands at the back end
 
@@ -208,15 +208,20 @@ export default function Scene({ view, svgRef, label }) {
 
   // Painted memes: the guys stand on the turning ground. Screen-space memes
   // (the sticks) put them at fixed spots, and move you to your end instead.
-  // Screen-space memes turn by mirroring round the middle: sx goes 1 -> -1.
-  const sx = layout ? Math.cos(((angle + (layout.turnedFor === "front" ? 180 : 0)) * Math.PI) / 180) : 1;
-  const mirror = ([x, y]) => [PLATE.cx + (x - PLATE.cx) * sx, y];
-  const a = layout ? mirror(layout.front) : project(GUY_A, angle);
-  const b = layout ? mirror(layout.back) : project(GUY_B, angle);
-  const youDx = layout ? layout.you : 0;
+  // Screen-space memes (the sticks) turn like a card: they squash to nothing
+  // and open back up showing the other side, swapping halfway.
+  const turn = ((angle % 360) + 360) % 360;
+  const shown = turn < 90 || turn > 270 ? "front" : "back";
+  const sx = layout ? Math.max(0.02, Math.abs(Math.cos((turn * Math.PI) / 180))) : 1;
+  const squeeze = ([x, y]) => [PLATE.cx + (x - PLATE.cx) * sx, y];
+  const other = shown === "front" ? "back" : "front";
+  const a = layout ? squeeze(layout.near) : project(GUY_A, angle);
+  const b = layout ? squeeze(layout.far) : project(GUY_B, angle);
+  const aText = layout ? meme.guys[shown] : meme.guys.front;
+  const bText = layout ? meme.guys[other] : meme.guys.back;
   const guys = [
-    { key: "a", pos: a, cap: false, text: meme.guys.front },
-    { key: "b", pos: b, cap: true, text: meme.guys.back },
+    { key: "a", pos: a, cap: false, text: aText },
+    { key: "b", pos: b, cap: true, text: bText },
   ].sort((p, q) => p.pos[1] - q.pos[1]);
 
   const bubbleFor = (g, i) => {
@@ -265,12 +270,12 @@ export default function Scene({ view, svgRef, label }) {
 
       {Ground ? (
         <g transform={`translate(${PLATE.cx} 0) scale(${sx.toFixed(4)} 1) translate(${-PLATE.cx} 0)`}>
-          <Ground palette={palette} side={view.side} />
+          <Ground palette={palette} side={shown} />
         </g>
       ) : (
         /* the drawing, painted flat on the ground and turned to your standpoint */
         <g transform={`translate(${PLATE.cx} ${PLATE.cy}) scale(1 ${PLATE.squash}) rotate(${angle.toFixed(2)})`}>
-          <circle r="300" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
+          <circle r="278" fill="none" stroke={palette.paint} strokeOpacity="0.5" strokeWidth="8" strokeDasharray="26 20" />
           <Drawing palette={palette} />
         </g>
       )}
@@ -282,7 +287,7 @@ export default function Scene({ view, svgRef, label }) {
       {guys.map(bubbleFor)}
 
       {/* you, from behind, in front of everything */}
-      <g className="scene-you" transform={youDx ? `translate(${youDx} 0)` : undefined}>
+      <g className="scene-you">
         {band === "deadzone" && (
           <g>
             <rect x="376" y="548" width="44" height="70" rx="8" fill="#111" stroke={palette.ink} strokeWidth="4" />
@@ -291,7 +296,7 @@ export default function Scene({ view, svgRef, label }) {
         )}
         <path d="M170 610 Q178 566 300 562 Q422 566 430 610 Z" fill={palette.accent2} stroke={palette.ink} strokeWidth="5" />
         <circle cx="300" cy="566" r="44" fill="#2b1d16" stroke={palette.ink} strokeWidth="5" />
-        <g transform={youDx < 0 ? "translate(394 588) rotate(6)" : "translate(206 588) rotate(-6)"}>
+        <g transform="translate(206 588) rotate(-6)">
           <rect x="-34" y="-17" width="68" height="34" rx="6" fill={palette.accent} stroke={palette.ink} strokeWidth="4" />
           <text x="0" y="10" textAnchor="middle" fontFamily="Bangers, Impact, sans-serif" fontSize="26" letterSpacing="2" fill="#111" className="scene-text">
             {SCENE.youTag}

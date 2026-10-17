@@ -510,63 +510,68 @@ button {
   letter-spacing: 0.04em;
 }
 
-/* ---------- stage: your POV ---------- */
+/* ---------- your POV + your turn ---------- */
 
-.stage {
+.pov {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: clamp(28px, 5vw, 64px);
-  align-items: center;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: clamp(20px, 3vw, 36px);
+  align-items: stretch;
   scroll-margin-top: 90px;
 }
 
-.stage__frame {
-  border: var(--border) solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: #1a0b10;
-  box-shadow: 10px 10px 0 var(--shadow);
-  transform: rotate(-1deg);
-}
-
-.stage__art {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.stage__copy {
+.pov__card {
   display: grid;
   gap: 12px;
+  align-content: start;
   justify-items: start;
+  padding: clamp(24px, 4vw, 44px);
+  border: var(--border) solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: 8px 8px 0 var(--shadow);
 }
 
-.stage__eyebrow {
+.pov__card--mine {
+  transform: rotate(-0.8deg);
+}
+
+.pov__card--ask {
+  background: var(--accent2);
+  color: #fff;
+  transform: rotate(0.8deg);
+}
+
+.pov__card--ask .label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pov__eyebrow {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 26px;
+  font-size: 24px;
   letter-spacing: 0.05em;
   color: var(--muted);
 }
 
-.stage__title {
+.pov__title {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(60px, 7vw, 108px);
+  font-size: clamp(56px, 7vw, 104px);
   line-height: 0.9;
   letter-spacing: 0.01em;
   text-shadow: 4px 4px 0 var(--accent);
 }
 
-.stage__word {
+.pov__word {
   display: inline-block;
   color: var(--accent2);
   text-shadow: 4px 4px 0 var(--line);
   animation: word-pop 700ms var(--pop) both;
 }
 
-.stage__meaning {
+.pov__meaning {
   margin: 2px 0 8px;
   max-width: 34ch;
   font-size: clamp(18px, 1.8vw, 22px);
@@ -574,7 +579,7 @@ button {
   line-height: 1.35;
 }
 
-.stage__pace {
+.pov__pace {
   min-height: 1.4em;
   margin: 0;
   font-family: var(--font-display);
@@ -585,23 +590,48 @@ button {
   transition: opacity 450ms var(--ease);
 }
 
-.stage__pace.is-shown {
+.pov__pace.is-shown {
   opacity: 1;
 }
 
-.stage__fine {
+.pov__fine {
   margin: 0;
   font-size: 13px;
   color: var(--muted);
 }
 
+.pov__ask {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 4.6vw, 64px);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  text-shadow: 3px 3px 0 var(--line);
+}
+
+.pov__body {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.pov__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 @media (max-width: 900px) {
-  .stage {
+  .pov {
     grid-template-columns: 1fr;
   }
-  .stage__frame {
+  .pov__card--mine,
+  .pov__card--ask {
     transform: none;
-    box-shadow: 6px 6px 0 var(--shadow);
   }
 }
 

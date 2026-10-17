@@ -135,7 +135,6 @@ export function composeView(s, memeIndex = 0, swapSide = false) {
       id: meme.id,
       Drawing: meme.Drawing, // painted on the turning ground
       Ground: meme.Ground, // or drawn in screen space, with its own layout
-      StageDrawing: meme.StageDrawing,
       layout: meme.layout,
       name: text.name,
       question: text.question,

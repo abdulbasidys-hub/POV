@@ -7,7 +7,7 @@ import { SIX_PATH } from "./glyph6.js";
 
 function SixNine({ palette }) {
   return (
-    <g transform="scale(1.5)">
+    <g transform="scale(1.32)">
       <path d={SIX_PATH} transform="translate(-5 7)" fill="#000" opacity="0.22" stroke="#000" strokeWidth="9" strokeLinejoin="round" />
       <path d={SIX_PATH} fill={palette.paint} stroke={palette.paint} strokeWidth="9" strokeLinejoin="round" />
     </g>
@@ -15,78 +15,60 @@ function SixNine({ palette }) {
 }
 
 // The "3 or 4 sticks" impossible figure, drawn as in the original meme: beams
-// lying on the ground. Nine parallel lines; at the left end they close off as 4
-// beams (each with a grey end face), at the right end as 3 beams with gaps.
-// Unlike the painted memes this is drawn in screen space, not on the turning
-// ground: you stand at one end of the pile or the other.
+// lying on the ground. Nine parallel lines close off as 4 beams at one end
+// (pairs of strips) and as 3 at the other (with gaps between them). The pile is
+// drawn from your side: its near end (lower right, by you) shows your count.
 const vadd = (a, b) => [a[0] + b[0], a[1] + b[1]];
 const vmul = (a, k) => [a[0] * k, a[1] * k];
+const FOUR = [[0, 1, 2], [2, 3, 4], [4, 5, 6], [6, 7, 8]];
+const THREE = [[0, 1, 2], [3, 4, 5], [6, 7, 8]];
 
-function beamGeometry({ origin, len, angle = -20, W = [11, 15], H = [0, 18.4] }) {
-  const r = (angle * Math.PI) / 180;
+function beamGeometry({ near, len, size, nearCount }) {
+  const r = (200 * Math.PI) / 180; // running away up-left from the near end
   const D = [Math.cos(r), Math.sin(r)];
-  const L = [origin];
-  for (let k = 1; k < 9; k++) L.push(vadd(L[k - 1], k % 2 ? W : H));
-  const steps = [W, H, W, W, H, W, W, H]; // the gaps at the right end step like a top face
-  const R = [vadd(origin, vmul(D, len))];
-  for (let k = 1; k < 9; k++) R.push(vadd(R[k - 1], steps[k - 1]));
-  // keep each right endpoint on its own line
-  return {
-    L,
-    R: R.map((p, k) => vadd(L[k], vmul(D, (p[0] - L[k][0]) * D[0] + (p[1] - L[k][1]) * D[1]))),
-  };
+  const W = [-11 * size, 15 * size]; // top face, across the pile
+  const H = [0, 18.4 * size]; // side face, the beam's height
+  const fourSteps = [W, H, W, H, W, H, W, H];
+  const threeSteps = [W, H, W, W, H, W, W, H]; // the gaps step like a top face
+  const chain = (start, steps) => steps.reduce((acc, st) => [...acc, vadd(acc[acc.length - 1], st)], [start]);
+  const N = chain(near, nearCount === 4 ? fourSteps : threeSteps);
+  const F0 = chain(vadd(near, vmul(D, len)), nearCount === 4 ? threeSteps : fourSteps);
+  // keep each far endpoint on its own line
+  const F = F0.map((p, k) => vadd(N[k], vmul(D, (p[0] - N[k][0]) * D[0] + (p[1] - N[k][1]) * D[1])));
+  return { N, F };
 }
 
 const pts = (list) => list.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join(" L");
 
-// `mark`: "four" | "three" — colour that end's faces to show where you stand.
-export function Beams({ origin, len, size = 1, ink = "#111111", cap = "#bdbdbd", mark, markColor, strokeWidth = 3 }) {
-  const g = beamGeometry({ origin, len, W: [11 * size, 15 * size], H: [0, 18.4 * size] });
-  const sw = strokeWidth;
+export function Beams({ near, len, size = 1, nearCount, ink = "#111111", cap = "#bdbdbd", strokeWidth = 3 }) {
+  const g = beamGeometry({ near, len, size, nearCount });
+  const nearGroups = nearCount === 4 ? FOUR : THREE;
+  const farGroups = nearCount === 4 ? THREE : FOUR;
   return (
-    <g strokeLinejoin="round" strokeLinecap="round">
-      {[0, 1, 2, 3].map((j) => {
-        const [a, b, c] = [g.L[2 * j], g.L[2 * j + 1], g.L[2 * j + 2]];
+    <g strokeLinejoin="round" strokeLinecap="round" strokeWidth={strokeWidth} stroke={ink}>
+      {/* the near ends you count: grey end faces */}
+      {nearGroups.map(([i, j, k]) => {
+        const [a, b, c] = [g.N[i], g.N[j], g.N[k]];
         const d = vadd(a, [c[0] - b[0], c[1] - b[1]]);
-        return <path key={`l${j}`} d={`M${pts([a, b, c, d])} Z`} fill={mark === "four" ? markColor : cap} stroke={ink} strokeWidth={sw} />;
+        return <path key={`n${i}`} d={`M${pts([a, b, c, d])} Z`} fill={cap} />;
       })}
-      {mark === "three" &&
-        [[0, 1, 2], [3, 4, 5], [6, 7, 8]].map(([i, j, k]) => {
-          const [a, b, c] = [g.R[i], g.R[j], g.R[k]];
-          const d = vadd(a, [c[0] - b[0], c[1] - b[1]]);
-          return <path key={`m${i}`} d={`M${pts([a, b, c, d])} Z`} fill={markColor} stroke={ink} strokeWidth={sw} />;
-        })}
-      {[[0, 1, 2], [3, 4, 5], [6, 7, 8]].map(([i, j, k]) => (
-        <path key={`r${i}`} d={`M${pts([g.R[i], g.R[j], g.R[k]])}`} fill="none" stroke={ink} strokeWidth={sw} />
+      {farGroups.map(([i, j, k]) => (
+        <path key={`f${i}`} d={`M${pts([g.F[i], g.F[j], g.F[k]])}`} fill="none" />
       ))}
-      {g.L.map((p, k) => (
-        <path key={`s${k}`} d={`M${pts([p, g.R[k]])}`} fill="none" stroke={ink} strokeWidth={sw} />
+      {g.N.map((p, k) => (
+        <path key={`s${k}`} d={`M${pts([p, g.F[k]])}`} fill="none" />
       ))}
     </g>
   );
 }
 
-// Hero scene: a white mat on the ground with the pile centred on it. The scene
-// mirrors it (turning it round) to show the visitor's end; see Scene.jsx.
-function SticksGround({ palette }) {
+// Hero scene: a white mat on the ground, the pile on it, near end by you.
+function SticksGround({ palette, side }) {
   return (
     <g>
-      <ellipse cx="306" cy="428" rx="232" ry="128" fill="#000" opacity="0.18" />
-      <ellipse cx="300" cy="420" rx="232" ry="128" fill={palette.paint} />
-      <Beams origin={[140, 396]} len={290} size={1.1} strokeWidth={3.2} />
-    </g>
-  );
-}
-
-// Stage: the pile, with your end lit up. Stage.jsx turns it to your side.
-function SticksStage({ palette, side }) {
-  const yours = side === "front" ? "three" : "four";
-  return (
-    <g>
-      <rect x="-205" y="-150" width="410" height="300" rx="20" transform="translate(10 12)" fill="#000" opacity="0.45" />
-      <rect x="-205" y="-150" width="410" height="300" rx="20" fill="#ffffff" stroke="#111" strokeWidth="6" />
-      <ellipse cx={yours === "four" ? -148 : 156} cy={yours === "four" ? 48 : -50} rx="62" ry="104" fill={palette.accent} opacity="0.35" />
-      <Beams origin={[-176, 0]} len={330} size={1.3} mark={yours} markColor={palette.accent} strokeWidth={3.6} />
+      <ellipse cx="324" cy="398" rx="236" ry="124" fill="#000" opacity="0.18" />
+      <ellipse cx="318" cy="390" rx="236" ry="124" fill={palette.paint} />
+      <Beams near={[466, 350]} len={270} size={1.04} nearCount={side === "front" ? 3 : 4} strokeWidth={3.2} />
     </g>
   );
 }
@@ -118,10 +100,8 @@ export const MEMES = [
   {
     id: "sticks",
     Ground: SticksGround,
-    StageDrawing: SticksStage,
-    // Drawn as seen from the four end. The two guys stand at the ends; you stay
-    // bottom-left while the pile turns round so your end comes to you.
-    layout: { front: [532, 360], back: [72, 484], you: -232, turnedFor: "front" },
+    // Your guy stands by the near end (next to you), the other at the far end.
+    layout: { near: [548, 512], far: [96, 300] },
   },
   { id: "mom-wow", Drawing: MomWow },
 ];
