@@ -66,18 +66,19 @@ export function Beams({ origin, len, size = 1, ink = "#111111", cap = "#bdbdbd",
   );
 }
 
-// Hero scene: a white mat on the ground with the beams on it.
+// Hero scene: a white mat on the ground with the pile centred on it. The scene
+// mirrors it (turning it round) to show the visitor's end; see Scene.jsx.
 function SticksGround({ palette }) {
   return (
     <g>
-      <ellipse cx="318" cy="424" rx="262" ry="122" fill="#000" opacity="0.18" />
-      <ellipse cx="312" cy="416" rx="262" ry="122" fill={palette.paint} />
-      <Beams origin={[128, 392]} len={340} size={1.25} strokeWidth={3.4} />
+      <ellipse cx="306" cy="428" rx="232" ry="128" fill="#000" opacity="0.18" />
+      <ellipse cx="300" cy="420" rx="232" ry="128" fill={palette.paint} />
+      <Beams origin={[140, 396]} len={290} size={1.1} strokeWidth={3.2} />
     </g>
   );
 }
 
-// Stage: the pile, with your end lit up.
+// Stage: the pile, with your end lit up. Stage.jsx turns it to your side.
 function SticksStage({ palette, side }) {
   const yours = side === "front" ? "three" : "four";
   return (
@@ -118,8 +119,9 @@ export const MEMES = [
     id: "sticks",
     Ground: SticksGround,
     StageDrawing: SticksStage,
-    // the two guys stand at the ends of the pile; you stand behind the one you agree with
-    layout: { front: [548, 372], back: [78, 488], you: { front: 205, back: -232 } },
+    // Drawn as seen from the four end. The two guys stand at the ends; you stay
+    // bottom-left while the pile turns round so your end comes to you.
+    layout: { front: [532, 360], back: [72, 484], you: -232, turnedFor: "front" },
   },
   { id: "mom-wow", Drawing: MomWow },
 ];

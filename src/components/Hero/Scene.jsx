@@ -208,9 +208,12 @@ export default function Scene({ view, svgRef, label }) {
 
   // Painted memes: the guys stand on the turning ground. Screen-space memes
   // (the sticks) put them at fixed spots, and move you to your end instead.
-  const a = layout ? layout.front : project(GUY_A, angle);
-  const b = layout ? layout.back : project(GUY_B, angle);
-  const youDx = layout ? layout.you[view.side] : 0;
+  // Screen-space memes turn by mirroring round the middle: sx goes 1 -> -1.
+  const sx = layout ? Math.cos(((angle + (layout.turnedFor === "front" ? 180 : 0)) * Math.PI) / 180) : 1;
+  const mirror = ([x, y]) => [PLATE.cx + (x - PLATE.cx) * sx, y];
+  const a = layout ? mirror(layout.front) : project(GUY_A, angle);
+  const b = layout ? mirror(layout.back) : project(GUY_B, angle);
+  const youDx = layout ? layout.you : 0;
   const guys = [
     { key: "a", pos: a, cap: false, text: meme.guys.front },
     { key: "b", pos: b, cap: true, text: meme.guys.back },
@@ -261,7 +264,9 @@ export default function Scene({ view, svgRef, label }) {
       )}
 
       {Ground ? (
-        <Ground palette={palette} side={view.side} />
+        <g transform={`translate(${PLATE.cx} 0) scale(${sx.toFixed(4)} 1) translate(${-PLATE.cx} 0)`}>
+          <Ground palette={palette} side={view.side} />
+        </g>
       ) : (
         /* the drawing, painted flat on the ground and turned to your standpoint */
         <g transform={`translate(${PLATE.cx} ${PLATE.cy}) scale(1 ${PLATE.squash}) rotate(${angle.toFixed(2)})`}>

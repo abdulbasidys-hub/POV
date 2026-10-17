@@ -67,7 +67,9 @@ function StageArt({ view }) {
       {/* the patch of ground, as you see it */}
       <g transform="translate(400 262)">
         {StageDrawing ? (
-          <StageDrawing palette={palette} side={view.side} />
+          <g transform={`scale(${Math.cos(((angle + (meme.layout?.turnedFor === "front" ? 180 : 0)) * Math.PI) / 180).toFixed(4)} 1)`}>
+            <StageDrawing palette={palette} side={view.side} />
+          </g>
         ) : (
           <>
             <rect x="-168" y="-196" width="336" height="392" rx="22" transform="translate(10 12)" fill="#000" opacity="0.45" />
