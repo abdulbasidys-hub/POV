@@ -68,13 +68,24 @@ function Guy({ x, y, cap, palette, shadowDx }) {
   ay = (ay / len) * 40;
   const side = x < PLATE.cx ? 1 : -1; // which way the free hand sits
   const stroke = { stroke: palette.figure, strokeWidth: 7, strokeLinecap: "round", strokeLinejoin: "round", fill: "none" };
+  // Limbs get a dark outline so a light figure still reads on a light patch
+  // (night figures are white; the sticks mat is white).
+  const outline = { ...stroke, stroke: "#111111", strokeWidth: 12 };
+  const limbs = [
+    "M-15 0 L0 -40 L15 0",
+    "M0 -40 L0 -80",
+    `M0 -70 L${ax.toFixed(1)} ${(-70 + ay).toFixed(1)}`,
+    `M0 -70 L${-side * 17} -55 L${-side * 6} -45`,
+  ];
   return (
     <g transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${k.toFixed(3)})`}>
       <ellipse cx={shadowDx} cy={3} rx={30} ry={8} fill="#000" opacity="0.28" />
-      <path d="M-15 0 L0 -40 L15 0" {...stroke} />
-      <path d="M0 -40 L0 -80" {...stroke} />
-      <path d={`M0 -70 L${ax.toFixed(1)} ${(-70 + ay).toFixed(1)}`} {...stroke} />
-      <path d={`M0 -70 L${-side * 17} -55 L${-side * 6} -45`} {...stroke} />
+      {limbs.map((d) => (
+        <path key={`o${d}`} d={d} {...outline} />
+      ))}
+      {limbs.map((d) => (
+        <path key={d} d={d} {...stroke} />
+      ))}
       <circle cx="0" cy="-97" r="18" fill={palette.bubble} stroke={palette.ink} strokeWidth="4" />
       <circle cx="-6" cy="-100" r="2.6" fill={palette.ink} />
       <circle cx="6" cy="-100" r="2.6" fill={palette.ink} />
@@ -275,7 +286,7 @@ export default function Scene({ view, svgRef, label }) {
         )}
         <path d="M170 610 Q178 566 300 562 Q422 566 430 610 Z" fill={palette.accent2} stroke={palette.ink} strokeWidth="5" />
         <circle cx="300" cy="566" r="44" fill="#2b1d16" stroke={palette.ink} strokeWidth="5" />
-        <g transform="translate(206 588) rotate(-6)">
+        <g transform={youDx < 0 ? "translate(394 588) rotate(6)" : "translate(206 588) rotate(-6)"}>
           <rect x="-34" y="-17" width="68" height="34" rx="6" fill={palette.accent} stroke={palette.ink} strokeWidth="4" />
           <text x="0" y="10" textAnchor="middle" fontFamily="Bangers, Impact, sans-serif" fontSize="26" letterSpacing="2" fill="#111" className="scene-text">
             {SCENE.youTag}

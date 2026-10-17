@@ -119,7 +119,7 @@ export const MEMES = [
     Ground: SticksGround,
     StageDrawing: SticksStage,
     // the two guys stand at the ends of the pile; you stand behind the one you agree with
-    layout: { front: [548, 372], back: [78, 488], you: { front: 160, back: -160 } },
+    layout: { front: [548, 372], back: [78, 488], you: { front: 205, back: -232 } },
   },
   { id: "mom-wow", Drawing: MomWow },
 ];
