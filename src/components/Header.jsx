@@ -2,7 +2,7 @@ import { CONFIG, IS_LIVE, PUMPFUN_URL } from "../config.js";
 import { NAV } from "../pov/copy.js";
 
 export default function Header() {
-  const ctaHref = IS_LIVE ? PUMPFUN_URL(CONFIG.CA.trim()) : CONFIG.X_URL;
+  const ctaHref = IS_LIVE ? PUMPFUN_URL(CONFIG.CA.trim()) : "#ca";
   return (
     <header className="topbar">
       <a className="logo" href="#top" aria-label={`${CONFIG.TICKER} home`}>
@@ -23,7 +23,11 @@ export default function Header() {
           </a>
         )}
       </nav>
-      <a className="btn btn--small btn--accent" href={ctaHref} target="_blank" rel="noopener noreferrer">
+      <a
+        className="btn btn--small btn--accent"
+        href={ctaHref}
+        {...(IS_LIVE ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+      >
         {IS_LIVE ? NAV.ctaLive : NAV.ctaSoon}
       </a>
     </header>

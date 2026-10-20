@@ -1,24 +1,10 @@
 import Reveal from "./Reveal.jsx";
 import { CONFIG, IS_LIVE, PUMPFUN_URL } from "../config.js";
-import { HOW_TO_BUY, LAUNCH } from "../pov/copy.js";
+import { HOW_TO_BUY } from "../pov/copy.js";
 
-// Live: the four steps. Pre-launch: where the CA will drop.
+// The four steps, once the CA is set.
 export default function HowToBuy({ reducedMotion }) {
-  if (!IS_LIVE) {
-    return (
-      <Reveal className="section launch" id="buy" reducedMotion={reducedMotion} aria-labelledby="launch-h">
-        <div className="launch__card">
-          <h2 id="launch-h" className="section__h">
-            {LAUNCH.heading}
-          </h2>
-          <p className="launch__body">{LAUNCH.body}</p>
-          <a className="btn btn--accent" href={CONFIG.X_URL} target="_blank" rel="noopener noreferrer">
-            {LAUNCH.cta}
-          </a>
-        </div>
-      </Reveal>
-    );
-  }
+  if (!IS_LIVE) return null;
   const ca = CONFIG.CA.trim();
   return (
     <Reveal className="section" id="buy" reducedMotion={reducedMotion} aria-labelledby="buy-h">

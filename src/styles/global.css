@@ -696,26 +696,7 @@ button {
   text-transform: uppercase;
 }
 
-/* ---------- launch / how to buy / CA ---------- */
-
-.launch__card {
-  display: grid;
-  justify-items: center;
-  gap: 16px;
-  padding: clamp(32px, 6vw, 64px) var(--gutter);
-  border: var(--border) solid var(--line);
-  border-radius: var(--radius);
-  background: var(--card);
-  box-shadow: 10px 10px 0 var(--shadow);
-  text-align: center;
-}
-
-.launch__body {
-  margin: 0;
-  max-width: 36ch;
-  font-size: 18px;
-  font-weight: 600;
-}
+/* ---------- how to buy / CA ---------- */
 
 .steps {
   list-style: none;
@@ -787,6 +768,13 @@ button {
   font-weight: 700;
   word-break: break-all;
   box-shadow: 4px 4px 0 var(--shadow);
+}
+
+.ca__value.is-pending {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
 }
 
 /* ---------- footer ---------- */

@@ -29,10 +29,11 @@ export default function ContractAddress({ reducedMotion }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef(0);
   useEffect(() => () => clearTimeout(timer.current), []);
-  if (!IS_LIVE) return null;
-  const ca = CONFIG.CA.trim();
+  // Always shown. Until CONFIG.CA is filled in it says "coming soon".
+  const ca = IS_LIVE ? CONFIG.CA.trim() : "";
 
   const onCopy = async () => {
+    if (!ca) return;
     if (await copyText(ca)) {
       setCopied(true);
       clearTimeout(timer.current);
@@ -41,13 +42,13 @@ export default function ContractAddress({ reducedMotion }) {
   };
 
   return (
-    <Reveal className="section" reducedMotion={reducedMotion} aria-labelledby="ca-h">
+    <Reveal className="section" id="ca" reducedMotion={reducedMotion} aria-labelledby="ca-h">
       <h2 id="ca-h" className="section__h">
         {CONTRACT.heading}
       </h2>
       <div className="ca">
-        <code className="ca__value">{ca}</code>
-        <button type="button" className="btn btn--accent" onClick={onCopy} aria-live="polite">
+        <code className={`ca__value ${ca ? "" : "is-pending"}`}>{ca || CONTRACT.pending}</code>
+        <button type="button" className="btn btn--accent" onClick={onCopy} disabled={!ca} aria-live="polite">
           {copied ? CONTRACT.copied : CONTRACT.copy}
         </button>
       </div>

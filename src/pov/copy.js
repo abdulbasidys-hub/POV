@@ -141,12 +141,6 @@ export const TOKEN = {
   ],
 };
 
-export const LAUNCH = {
-  heading: "CA drops on X.",
-  body: "Not here. Not yet. Follow so you see it first.",
-  cta: "Follow on X",
-};
-
 export const HOW_TO_BUY = {
   heading: "How to buy",
   steps: [
@@ -161,6 +155,7 @@ export const CONTRACT = {
   heading: "Contract address",
   copy: "Copy",
   copied: "Copied. Same CA. Every POV.",
+  pending: "Coming soon",
 };
 
 export const TILT = {

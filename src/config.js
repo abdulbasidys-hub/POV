@@ -1,7 +1,14 @@
 export const CONFIG = {
   NAME: "69",
   TICKER: "$POV",
-  CA: "",                                  // empty = pre-launch mode
+  // ==========================================================
+  //   CONTRACT ADDRESS: paste it between the quotes below,
+  //   e.g.  CA: "AbCd...pump",
+  //   That's the only change needed at launch: it shows the CA on
+  //   the site with a copy button, and turns on How to buy and the
+  //   Buy buttons (pump.fun links).
+  // ==========================================================
+  CA: "",
   X_URL: "https://x.com/REPLACE_ME",
   TG_URL: "",                              // empty = no Telegram link
   COMMUNITY_URL: "",                       // X community / group; empty = TG_URL, then X_URL
